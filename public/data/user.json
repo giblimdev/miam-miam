@@ -1,0 +1,90 @@
+[
+  {
+    "id": "b3f1c8a2-4e9d-4f3a-8e7b-1c5d2a9f6e3b",
+    "name": "HEURTEUX Jean-Philippe",
+    "email": "jp.heurteux@email.com",
+    "emailVerified": "2026-07-15T10:30:00.000Z",
+    "image": "avatar/avatarjp.png",
+    "roles": [
+      {
+        "id": "role_role_super_admin_user_1786423413123_4nqk89j",
+        "name": "role_super_admin",
+        "permissions": []
+      }
+    ],
+    "phone": "+33687654321",
+    "notificationSettings": {
+      "push": true,
+      "email": true,
+      "sms": true
+    },
+    "profil": {
+      "id": "profil_fondateur",
+      "bio": "",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": [
+        ""
+      ],
+      "allergies": [
+        ""
+      ],
+      "address": [
+        {
+          "id": "addr_premium_1",
+          "typeAdress": "deliveryAddress",
+          "street": "45 Avenue des Ternes",
+          "city": "Paris",
+          "postalCode": "75017",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Ternes",
+          "complement": "Bâtiment A",
+          "buildingName": "Les Ternes",
+          "floor": "5",
+          "door": "18",
+          "additionalInfo": "Code porte : 4567",
+          "lat": 48.8785,
+          "lng": 2.2978,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": "Laisser au gardien"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-07-15T09:00:00.000Z",
+    "updatedAt": "2026-08-01T14:20:00.000Z",
+    "deletedAt": null
+  },
+
+
+  {
+    "id": "user_1786423413123_or7w51x",
+    "name": "jp",
+    "email": "admin@test.com",
+    "phone": "",
+    "roles": [
+      {
+        "id": "role_role_super_admin_user_1786423413123_4nqk89j",
+        "name": "role_super_admin",
+        "permissions": []
+      }
+    ],
+    "notificationSettings": {
+      "push": true,
+      "email": true,
+      "sms": false
+    },
+    "profil": {
+      "id": "user_1786423413123_7xx8ou9",
+      "bio": "",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": [],
+      "allergies": [],
+      "address": []
+    },
+    "favorites": [],
+    "createdAt": "2026-08-11T04:43:33.123Z",
+    "updatedAt": "2026-08-11T04:43:33.123Z"
+  }
+]

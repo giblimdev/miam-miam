@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Prisma
+/lib/generated/prisma
+
+# ============================================================
+# EXCEPTIONS : Fichiers Prisma à garder dans Git
+# ============================================================
+!prisma/dev.db
+!prisma/dev.db-journal
+!prisma/migrations/
+!prisma/data/
+!prisma/exports/

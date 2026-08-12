@@ -1,0 +1,106 @@
+[
+  {
+    "id": "site-1",
+    "name": "Quick Burger Centre",
+    "phone": "+33 1 23 45 67 89",
+    "email": "centre@quick-burger.example.com",
+    "isOpen": true,
+    "openingHours": [],
+    "createdAt": "2025-01-10T00:00:00Z",
+    "updatedAt": "2025-01-10T00:00:00Z",
+    "address": {
+      "id": "addr-1",
+      "typeAdress": "deliveryAddress",
+      "street": "12 rue de la Paix",
+      "city": "Paris",
+      "postalCode": "75001",
+      "countryCode": "FR",
+      "lat": 48.8566,
+      "lng": 2.3522,
+      "label": "Principal",
+      "isDefault": true
+    },
+    "deliveryZones": [],
+    "productStock": [],
+    "brandId": "brand-1"
+  },
+  {
+    "id": "site-2",
+    "name": "Sushi World Opéra",
+    "phone": "+33 1 98 76 54 32",
+    "email": "opera@sushi-world.example.com",
+    "isOpen": false,
+    "openingHours": [],
+    "createdAt": "2025-03-01T00:00:00Z",
+    "updatedAt": "2025-03-01T00:00:00Z",
+    "address": {
+      "id": "addr-2",
+      "typeAdress": "deliveryAddress",
+      "street": "5 avenue de l'Opéra",
+      "city": "Paris",
+      "postalCode": "75002",
+      "countryCode": "FR",
+      "lat": 48.8667,
+      "lng": 2.3333,
+      "label": "Siège",
+      "isDefault": true
+    },
+    "deliveryZones": [],
+    "productStock": [],
+    "brandId": "brand-2"
+  },
+  {
+  "name": "Syle&Beanté",
+  "brandId": "550e8400-e29b-41d4-a716-446655440001",
+  "phone": "0636972641",
+  "email": "admin@admin.com",
+  "isOpen": true,
+  "address": {
+    "id": "",
+    "typeAdress": "deliveryAddress",
+    "street": "carrera 8 calle 12 #20",
+    "city": "popayan",
+    "postalCode": "90001",
+    "countryCode": "FR",
+    "lat": 48.555,
+    "lng": 2.3522,
+    "label": "",
+    "instructions": "Tocar el timbre 201"
+  },
+  "openingHours": [
+    {
+      "id": "",
+      "SiteId": "",
+      "dayOfWeek": 1,
+      "openTime": "09:00",
+      "closeTime": "23:00"
+    },
+    {
+      "id": "",
+      "SiteId": "",
+      "dayOfWeek": 2,
+      "openTime": "09:00",
+      "closeTime": "18:00"
+    },
+    {
+      "id": "",
+      "SiteId": "",
+      "dayOfWeek": 3,
+      "openTime": "09:00",
+      "closeTime": "18:00"
+    }
+  ],
+  "deliveryZones": [
+    {
+      "id": "",
+      "siteId": "",
+      "name": "centre ville",
+      "polygon": [],
+      "deliveryFee": 2.19,
+      "estimatedDeliveryMinutes": 30,
+      "minimumOrderAmount": 8.5,
+      "isActive": true
+    }
+  ]
+}
+]

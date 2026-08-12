@@ -1,0 +1,538 @@
+[ {
+    "id": "user_client_premium",
+    "name": "Marc Lefevre",
+    "email": "marc.lefevre@email.com",
+    "emailVerified": "2026-07-15T10:30:00.000Z",
+    "image": "https://avatars.example.com/marc.jpg",
+    "roles": ["role_client"],
+    "phone": "+33687654321",
+    "notificationSettings": {
+      "push": true,
+      "email": true,
+      "sms": true
+    },
+    "profil": {
+      "id": "profil_client_premium",
+      "bio": "Amateur de gastronomie, client fidèle depuis 2 ans",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": ["gluten-free", "low-carb"],
+      "allergies": ["gluten", "lactose"],
+      "address": [
+        {
+          "id": "addr_premium_1",
+          "typeAdress": "deliveryAddress",
+          "street": "45 Avenue des Ternes",
+          "city": "Paris",
+          "postalCode": "75017",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Ternes",
+          "complement": "Bâtiment A",
+          "buildingName": "Les Ternes",
+          "floor": "5",
+          "door": "18",
+          "additionalInfo": "Code porte : 4567",
+          "lat": 48.8785,
+          "lng": 2.2978,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": "Laisser au gardien"
+        },
+        {
+          "id": "addr_premium_2",
+          "typeAdress": "deliveryAddress",
+          "street": "12 Rue de la Paix",
+          "city": "Paris",
+          "postalCode": "75002",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Opéra",
+          "complement": "Bureau 302",
+          "buildingName": "Tour Opéra",
+          "floor": "3",
+          "door": "302",
+          "additionalInfo": "Ascenseur gauche",
+          "lat": 48.8690,
+          "lng": 2.3300,
+          "label": "Travail",
+          "isDefault": false,
+          "instructions": "Livraison entre 9h et 18h"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-07-15T09:00:00.000Z",
+    "updatedAt": "2026-08-01T14:20:00.000Z",
+    "deletedAt": null
+  },
+
+  {
+    "id": "user_client_vegan",
+    "name": "Emma Rousseau",
+    "email": "emma.rousseau@email.com",
+    "emailVerified": "2026-08-01T08:00:00.000Z",
+    "image": null,
+    "roles": ["role_client"],
+    "phone": "+33611223344",
+    "notificationSettings": {
+      "push": false,
+      "email": true,
+      "sms": false
+    },
+    "profil": {
+      "id": "profil_client_vegan",
+      "bio": "Végétalienne engagée, je teste tous les nouveaux restaurants vegan",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": ["vegan"],
+      "allergies": ["soja"],
+      "address": [
+        {
+          "id": "addr_vegan_1",
+          "typeAdress": "deliveryAddress",
+          "street": "8 Rue des Lilas",
+          "city": "Lyon",
+          "postalCode": "69007",
+          "countryCode": "FR",
+          "state": "Auvergne-Rhône-Alpes",
+          "neighborhood": "Jean Macé",
+          "complement": null,
+          "buildingName": "Le Lilas",
+          "floor": "2",
+          "door": "B",
+          "additionalInfo": null,
+          "lat": 45.7460,
+          "lng": 4.8320,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": "Interphone Rousseau"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-08-01T08:00:00.000Z",
+    "updatedAt": "2026-08-01T08:00:00.000Z",
+    "deletedAt": null
+  },
+{
+    "id": "user_client_foreign",
+    "name": "John Smith",
+    "email": "john.smith@email.com",
+    "emailVerified": "2026-08-08T15:00:00.000Z",
+    "image": "https://avatars.example.com/john.jpg",
+    "roles": ["role_client"],
+    "phone": "+447912345678",
+    "notificationSettings": {
+      "push": true,
+      "email": true,
+      "sms": true
+    },
+    "profil": {
+      "id": "profil_client_foreign",
+      "bio": "Expats in Paris, love French food!",
+      "preferredLanguage": "EN",
+      "dietaryPreferences": ["halal"],
+      "allergies": [],
+      "address": [
+        {
+          "id": "addr_foreign_1",
+          "typeAdress": "deliveryAddress",
+          "street": "22 Rue de la Tour d'Auvergne",
+          "city": "Paris",
+          "postalCode": "75009",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Opéra",
+          "complement": "Appartement 14",
+          "buildingName": "La Tour",
+          "floor": "4",
+          "door": "14",
+          "additionalInfo": "Sonnette John",
+          "lat": 48.8765,
+          "lng": 2.3425,
+          "label": "Apartment",
+          "isDefault": true,
+          "instructions": "Ring bell for John"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-08-08T14:00:00.000Z",
+    "updatedAt": "2026-08-08T14:00:00.000Z",
+    "deletedAt": null
+  },
+
+  {
+    "id": "user_client_deleted",
+    "name": "Sophie Moreau",
+    "email": "sophie.moreau@email.com",
+    "emailVerified": "2025-12-01T12:00:00.000Z",
+    "image": null,
+    "roles": ["role_client"],
+    "phone": "+33698765431",
+    "notificationSettings": {
+      "push": false,
+      "email": false,
+      "sms": false
+    },
+    "profil": {
+      "id": "profil_client_deleted",
+      "bio": "Ancienne cliente",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": [],
+      "allergies": [],
+      "address": [
+        {
+          "id": "addr_deleted_1",
+          "typeAdress": "deliveryAddress",
+          "street": "5 Rue de la République",
+          "city": "Nantes",
+          "postalCode": "44000",
+          "countryCode": "FR",
+          "state": "Pays de la Loire",
+          "neighborhood": "Centre",
+          "complement": null,
+          "buildingName": null,
+          "floor": null,
+          "door": null,
+          "additionalInfo": null,
+          "lat": 47.2184,
+          "lng": -1.5536,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": null
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2025-12-01T09:00:00.000Z",
+    "updatedAt": "2025-12-01T09:00:00.000Z",
+    "deletedAt": "2026-06-15T10:00:00.000Z"
+  },
+
+  {
+    "id": "user_brand_admin_2",
+    "name": "Pierre Dubois",
+    "email": "pierre@gourmetdelice.fr",
+    "emailVerified": "2026-02-01T09:00:00.000Z",
+    "image": "https://avatars.example.com/pierre.jpg",
+    "roles": ["role_brand_admin"],
+    "phone": "+33620304050",
+    "notificationSettings": {
+      "push": true,
+      "email": true,
+      "sms": false
+    },
+    "profil": {
+      "id": "profil_brand_admin_2",
+      "bio": "Propriétaire du groupe Gourmet Délices (restaurants à Paris et Lyon)",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": ["pescetarian"],
+      "allergies": [],
+      "address": [
+        {
+          "id": "addr_brand_admin_2_1",
+          "typeAdress": "billingAddress",
+          "street": "120 Rue de la Roquette",
+          "city": "Paris",
+          "postalCode": "75011",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Bastille",
+          "complement": null,
+          "buildingName": "Le Gourmet",
+          "floor": null,
+          "door": null,
+          "additionalInfo": null,
+          "lat": 48.8573,
+          "lng": 2.3772,
+          "label": "Bureau",
+          "isDefault": true,
+          "instructions": "Entrée par le restaurant"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-02-01T09:00:00.000Z",
+    "updatedAt": "2026-07-20T15:00:00.000Z",
+    "deletedAt": null
+  },
+
+  {
+    "id": "user_site_manager_2",
+    "name": "Julie Martin",
+    "email": "julie@gourmetdelice-lyon.fr",
+    "emailVerified": "2026-03-01T10:00:00.000Z",
+    "image": null,
+    "roles": ["role_site_manager"],
+    "phone": "+33660708090",
+    "notificationSettings": {
+      "push": false,
+      "email": true,
+      "sms": true
+    },
+    "profil": {
+      "id": "profil_site_manager_2",
+      "bio": "Gérante du restaurant Gourmet Délices Lyon",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": [],
+      "allergies": ["fruits à coque"],
+      "address": [
+        {
+          "id": "addr_site_manager_2_1",
+          "typeAdress": "deliveryAddress",
+          "street": "45 Rue Mercière",
+          "city": "Lyon",
+          "postalCode": "69002",
+          "countryCode": "FR",
+          "state": "Auvergne-Rhône-Alpes",
+          "neighborhood": "Presqu'île",
+          "complement": "Cours de la Loge",
+          "buildingName": null,
+          "floor": null,
+          "door": null,
+          "additionalInfo": null,
+          "lat": 45.7630,
+          "lng": 4.8330,
+          "label": "Travail",
+          "isDefault": true,
+          "instructions": "Livraison par l'arrière"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-03-01T09:00:00.000Z",
+    "updatedAt": "2026-03-01T09:00:00.000Z",
+    "deletedAt": null
+  },
+
+  {
+    "id": "user_driver_2",
+    "name": "Thomas Bernard",
+    "email": "thomas.driver@appfood.com",
+    "emailVerified": "2026-01-25T11:00:00.000Z",
+    "image": "https://avatars.example.com/thomas.jpg",
+    "roles": ["role_driver"],
+    "phone": "+33655556666",
+    "notificationSettings": {
+      "push": true,
+      "email": false,
+      "sms": true
+    },
+    "profil": {
+      "id": "profil_driver_2",
+      "bio": "Livreur depuis 3 ans, zone Paris Centre",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": [],
+      "allergies": [],
+      "address": [
+        {
+          "id": "addr_driver_2_1",
+          "typeAdress": "deliveryAddress",
+          "street": "18 Rue des Martyrs",
+          "city": "Paris",
+          "postalCode": "75009",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Pigalle",
+          "complement": "Escalier B",
+          "buildingName": "Les Martyrs",
+          "floor": "1",
+          "door": "5",
+          "additionalInfo": "Code : 1234",
+          "lat": 48.8830,
+          "lng": 2.3390,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": "Passer après 14h"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-01-25T09:00:00.000Z",
+    "updatedAt": "2026-07-01T08:00:00.000Z",
+    "deletedAt": null
+  },
+  {
+    "id": "user_client_unverified",
+    "name": "Nicolas Petit",
+    "email": "nicolas.petit@email.com",
+    "emailVerified": null,
+    "image": null,
+    "roles": ["role_client"],
+    "phone": "+33677778888",
+    "notificationSettings": {
+      "push": false,
+      "email": true,
+      "sms": false
+    },
+    "profil": {
+      "id": "profil_client_unverified",
+      "bio": "",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": [],
+      "allergies": [],
+      "address": [
+        {
+          "id": "addr_unverified_1",
+          "typeAdress": "deliveryAddress",
+          "street": "3 Rue de la Gare",
+          "city": "Paris",
+          "postalCode": "75010",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Gare du Nord",
+          "complement": "Appartement 8",
+          "buildingName": "Le Gare",
+          "floor": "3",
+          "door": "8",
+          "additionalInfo": null,
+          "lat": 48.8790,
+          "lng": 2.3550,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": "Sonnette Petit"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-08-10T12:00:00.000Z",
+    "updatedAt": "2026-08-10T12:00:00.000Z",
+    "deletedAt": null
+  },
+
+  {
+    "id": "user_client_heavy",
+    "name": "Isabelle Leroy",
+    "email": "isabelle.leroy@email.com",
+    "emailVerified": "2025-10-01T14:00:00.000Z",
+    "image": "https://avatars.example.com/isabelle.jpg",
+    "roles": ["role_client"],
+    "phone": "+33699998888",
+    "notificationSettings": {
+      "push": true,
+      "email": true,
+      "sms": false
+    },
+    "profil": {
+      "id": "profil_client_heavy",
+      "bio": "Client régulier, plus de 100 commandes !",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": ["sans porc"],
+      "allergies": ["arachide"],
+      "address": [
+        {
+          "id": "addr_heavy_1",
+          "typeAdress": "deliveryAddress",
+          "street": "6 Rue de la Pompe",
+          "city": "Paris",
+          "postalCode": "75116",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Trocadéro",
+          "complement": "Bâtiment B",
+          "buildingName": "La Pompe",
+          "floor": "2",
+          "door": "B12",
+          "additionalInfo": "Interphone 12",
+          "lat": 48.8620,
+          "lng": 2.2820,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": "Sonnette Leroy"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2025-10-01T09:00:00.000Z",
+    "updatedAt": "2026-08-09T20:00:00.000Z",
+    "deletedAt": null
+  },
+
+  {
+    "id": "user_client_suspended",
+    "name": "François Durand",
+    "email": "francois.durand@email.com",
+    "emailVerified": "2026-03-15T10:00:00.000Z",
+    "image": null,
+    "roles": ["role_client"],
+    "phone": "+33644445555",
+    "notificationSettings": {
+      "push": false,
+      "email": false,
+      "sms": false
+    },
+    "profil": {
+      "id": "profil_client_suspended",
+      "bio": "",
+      "preferredLanguage": "FR",
+      "dietaryPreferences": [],
+      "allergies": [],
+      "address": [
+        {
+          "id": "addr_suspended_1",
+          "typeAdress": "deliveryAddress",
+          "street": "72 Rue de la Convention",
+          "city": "Paris",
+          "postalCode": "75015",
+          "countryCode": "FR",
+          "state": "Île-de-France",
+          "neighborhood": "Convention",
+          "complement": null,
+          "buildingName": "La Convention",
+          "floor": "4",
+          "door": "C",
+          "additionalInfo": "Bâtiment C",
+          "lat": 48.8430,
+          "lng": 2.2980,
+          "label": "Maison",
+          "isDefault": true,
+          "instructions": "Sonnette Durand"
+        }
+      ]
+    },
+    "favorites": [],
+    "createdAt": "2026-03-15T09:00:00.000Z",
+    "updatedAt": "2026-07-30T18:00:00.000Z",
+    "deletedAt": "2026-07-30T18:00:00.000Z"  
+  },
+{
+  "name": "Alice Dupont",
+  "email": "alice@example.com",
+  "password": "MonMotDePasse123!",
+  "phone": "+33612345678",
+  "image": null,
+  "roles": ["role_client"],
+  "notificationSettings": {
+    "push": true,
+    "email": true,
+    "sms": false
+  },
+  "profil": {
+    "bio": "Passionnée de cuisine asiatique",
+    "preferredLanguage": "FR",
+    "dietaryPreferences": ["vegetarian"],
+    "allergies": ["milk"],
+    "address": [
+      {
+        "typeAdress": "deliveryAddress",
+        "street": "10 Rue de Rivoli",
+        "city": "Paris",
+        "postalCode": "75004",
+        "countryCode": "FR",
+        "state": "Île-de-France",
+        "neighborhood": "Le Marais",
+        "complement": "Escalier A",
+        "buildingName": "Le Rivoli",
+        "floor": "2",
+        "door": "12",
+        "additionalInfo": null,
+        "lat": 48.8575,
+        "lng": 2.3514,
+        "label": "Maison",
+        "isDefault": true,
+        "instructions": "Laisser devant la porte"
+      }
+    ]
+  }
+}
+]

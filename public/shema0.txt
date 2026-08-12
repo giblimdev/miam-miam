@@ -1,0 +1,1102 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime
+  User                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Address {
+  id             String   @id
+  typeAdress     String   @default("deliveryAddress")
+  street         String
+  city           String
+  postalCode     String?
+  countryCode    String   @default("FR")
+  state          String?
+  neighborhood   String?
+  complement     String?
+  buildingName   String?
+  floor          String?
+  door           String?
+  additionalInfo String?
+  lat            Float?
+  lng            Float?
+  label          String?
+  isDefault      Boolean?
+  instructions   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime
+  userId         String?
+  siteId         String?  @unique
+  Site           Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  User           User?    @relation(fields: [userId], references: [id])
+  Profil         Profil[]
+}
+
+model AnnouncementChannel {
+  id                 String             @id
+  value              String
+  announcementId     String
+  GlobalAnnouncement GlobalAnnouncement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@index([announcementId])
+}
+
+model AvailabilitySlot {
+  id        String @id
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  driverId  String
+  Driver    Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([driverId])
+}
+
+model BlogPost {
+  id          String        @id
+  title       String
+  content     String
+  excerpt     String?
+  category    String
+  imageUrl    String?
+  published   Boolean       @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  authorId    String
+  User        User          @relation(fields: [authorId], references: [id])
+  BlogPostTag BlogPostTag[]
+}
+
+model BlogPostTag {
+  id         String   @id
+  value      String
+  blogPostId String
+  BlogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+
+  @@index([blogPostId])
+}
+
+model Brand {
+  id                   String                 @id
+  slug                 String                 @unique
+  name                 String
+  description          String
+  logo                 String?
+  website              String?
+  deletedAt            DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  BrandType            BrandType[]
+  Faq                  Faq[]
+  FinancialReport      FinancialReport[]
+  Gallery              Gallery[]
+  Payout               Payout[]
+  Product              Product[]
+  Promotion            Promotion[]
+  QualityProgramWinner QualityProgramWinner[]
+  Site                 Site[]
+}
+
+model BrandType {
+  id      String @id
+  value   String
+  brandId String
+  Brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+}
+
+model Cart {
+  id            String     @id
+  sessionId     String
+  promotionCode String?
+  subtotal      Float      @default(0)
+  deliveryFee   Float      @default(0)
+  serviceFee    Float      @default(0)
+  totalAmount   Float      @default(0)
+  expiresAt     DateTime
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime
+  userId        String?
+  siteId        String
+  brandId       String
+  Site          Site       @relation(fields: [siteId], references: [id])
+  User          User?      @relation(fields: [userId], references: [id])
+  CartItem      CartItem[]
+}
+
+model CartItem {
+  id             String           @id
+  quantity       Int
+  cartId         String
+  productId      String
+  Product        Product          @relation(fields: [productId], references: [id])
+  Cart           Cart             @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  CartItemOption CartItemOption[]
+
+  @@index([cartId])
+}
+
+model CartItemOption {
+  id              String   @id
+  optionGroupId   String
+  optionGroupName String
+  optionId        String
+  optionName      String
+  extraCost       Float
+  cartItemId      String
+  CartItem        CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+
+  @@index([cartItemId])
+}
+
+model Category {
+  id              String            @id
+  name            String
+  categoryType    String
+  orderdisplay    Int               @default(0)
+  description     String            @default("")
+  image           String?
+  ProductCategory ProductCategory[]
+}
+
+model ChatMessage {
+  id            String        @id
+  message       String
+  attachmentUrl String?
+  deletedAt     DateTime?
+  createdAt     DateTime      @default(now())
+  ticketId      String
+  senderId      String
+  senderType    String        @default("CLIENT")
+  SupportTicket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model Delivery {
+  id                  String       @id
+  status              String       @default("ACCEPTED")
+  pickupEstimatedAt   DateTime?
+  deliveryEstimatedAt DateTime?
+  actualPickupAt      DateTime?
+  actualDeliveryAt    DateTime?
+  otpCode             String
+  deliveryPhoto       String?
+  driverComent        String?
+  deletedAt           DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime
+  orderId             String       @unique
+  driverId            String
+  Driver              Driver       @relation(fields: [driverId], references: [id])
+  Order               Order        @relation(fields: [orderId], references: [id])
+  TrackPoint          TrackPoint[]
+}
+
+model DeliveryZone {
+  id                       String              @id
+  name                     String
+  deliveryFee              Float               @default(0)
+  estimatedDeliveryMinutes Int                 @default(30)
+  minimumOrderAmount       Float               @default(0)
+  isActive                 Boolean             @default(true)
+  siteId                   String
+  Site                     Site                @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  DeliveryZonePoint        DeliveryZonePoint[]
+
+  @@index([siteId])
+}
+
+model DeliveryZonePoint {
+  id           String       @id
+  lat          Float
+  lng          Float
+  order        Int
+  zoneId       String
+  DeliveryZone DeliveryZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@index([zoneId])
+}
+
+model Driver {
+  id               String             @id
+  status           String             @default("OFFLINE")
+  currentLat       Float?
+  currentLng       Float?
+  rating           Float              @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  userId           String             @unique
+  AvailabilitySlot AvailabilitySlot[]
+  Delivery         Delivery[]
+  User             User               @relation(fields: [userId], references: [id])
+  KycDocument      KycDocument[]
+}
+
+model Faq {
+  id       String @id
+  useBy    String
+  question String
+  answer   String
+  brandId  String
+  Brand    Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+}
+
+model Favorite {
+  id         String   @id
+  targetType String
+  targetId   String
+  createdAt  DateTime @default(now())
+  userId     String
+  User       User     @relation(fields: [userId], references: [id])
+}
+
+model FinancialReport {
+  id                   String                 @id
+  periodStart          DateTime
+  periodEnd            DateTime
+  grossRevenue         Float
+  commissionTotal      Float
+  deliveryFees         Float
+  netAmount            Float
+  transactionCount     Int
+  brandId              String
+  Brand                Brand                  @relation(fields: [brandId], references: [id])
+  FinancialTransaction FinancialTransaction[]
+}
+
+model FinancialTransaction {
+  id              String          @id
+  orderId         String
+  date            DateTime
+  grossAmount     Float
+  commission      Float
+  deliveryFee     Float
+  tax             Float
+  net             Float
+  reportId        String
+  FinancialReport FinancialReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+}
+
+model FraudAlert {
+  id            String   @id
+  ruleTriggered String
+  severity      String   @default("LOW")
+  status        String   @default("OPEN")
+  resolution    String?
+  createdAt     DateTime @default(now())
+  orderId       String?
+  Order         Order?   @relation(fields: [orderId], references: [id])
+}
+
+model Gallery {
+  id           String         @id
+  name         String
+  altText      String
+  description  String?
+  mainImage    String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  brandId      String?
+  productId    String         @unique
+  ownerId      String
+  User         User           @relation(fields: [ownerId], references: [id])
+  Product      Product        @relation(fields: [productId], references: [id])
+  Brand        Brand?         @relation(fields: [brandId], references: [id])
+  GalleryImage GalleryImage[]
+}
+
+model GalleryImage {
+  id        String  @id
+  url       String
+  galleryId String
+  Gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@index([galleryId])
+}
+
+model GlobalAnnouncement {
+  id                  String                @id
+  title               String
+  message             String
+  importance          String                @default("INFO")
+  targetSegment       String?
+  startAt             DateTime
+  endAt               DateTime?
+  createdAt           DateTime              @default(now())
+  AnnouncementChannel AnnouncementChannel[]
+}
+
+model Ingredient {
+  id        String   @id
+  name      String
+  quantity  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  recipeId  String
+  Recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model KycDocument {
+  id         String   @id
+  type       String
+  fileUrl    String
+  status     String   @default("PENDING")
+  reviewedBy String?
+  createdAt  DateTime @default(now())
+  userId     String
+  driverId   String?
+  Driver     Driver?  @relation(fields: [driverId], references: [id])
+  User       User     @relation(fields: [userId], references: [id])
+}
+
+model LoyaltyAccount {
+  id                String              @id
+  pointsBalance     Int                 @default(0)
+  level             String              @default("BRONZE")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime
+  userId            String              @unique
+  User              User                @relation(fields: [userId], references: [id])
+  PointsTransaction PointsTransaction[]
+}
+
+model LoyaltyProgramConfig {
+  id                      String          @id
+  pointsPerEuro           Float
+  levelThresholdsBronze   Int
+  levelThresholdsSilver   Int
+  levelThresholdsGold     Int
+  levelThresholdsPlatinum Int
+  referralRewardAmount    Float
+  referralRewardCurrency  String          @default("EUR")
+  LoyaltyReward           LoyaltyReward[]
+}
+
+model LoyaltyReward {
+  id                   String               @id
+  level                String
+  description          String
+  configId             String
+  LoyaltyProgramConfig LoyaltyProgramConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@index([configId])
+}
+
+model Menu {
+  id          String        @id
+  title       String
+  productId   String        @unique
+  Product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  MenuSection MenuSection[]
+}
+
+model MenuSection {
+  id              String            @id
+  name            String
+  minSelection    Int               @default(0)
+  maxSelection    Int               @default(1)
+  menuId          String
+  Menu            Menu              @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  MenuSectionItem MenuSectionItem[]
+
+  @@index([menuId])
+}
+
+model MenuSectionItem {
+  id            String      @id
+  menuSectionId String
+  productId     String
+  Product       Product     @relation(fields: [productId], references: [id])
+  MenuSection   MenuSection @relation(fields: [menuSectionId], references: [id], onDelete: Cascade)
+
+  @@index([menuSectionId])
+}
+
+model Notification {
+  id        String   @id
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
+}
+
+model NutritionalInfo {
+  id            String  @id
+  calories      Float
+  proteins      Float
+  carbohydrates Float
+  fat           Float
+  fiber         Float?
+  salt          Float?
+  productId     String  @unique
+  Product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model OpeningHours {
+  id        String @id
+  dayOfWeek Int
+  openTime  String
+  closeTime String
+  siteId    String
+  Site      Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+}
+
+model Option {
+  id             String           @id
+  name           String
+  extraPrice     Float            @default(0)
+  isDefault      Boolean          @default(false)
+  optionGroupId  String
+  OptionGroup    OptionGroup      @relation(fields: [optionGroupId], references: [id], onDelete: Cascade)
+  OptionAllergen OptionAllergen[]
+
+  @@index([optionGroupId])
+}
+
+model OptionAllergen {
+  id       String @id
+  value    String
+  optionId String
+  Option   Option @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@index([optionId])
+}
+
+model OptionGroup {
+  id           String   @id
+  name         String
+  type         String   @default("OPTIONAL")
+  minSelection Int      @default(0)
+  maxSelection Int      @default(1)
+  productId    String
+  Option       Option[]
+  Product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model Order {
+  id                    String          @id
+  number                String          @unique
+  status                String          @default("CREATED")
+  isScheduled           Boolean         @default(false)
+  scheduledFor          DateTime?
+  subtotal              Float
+  deliveryFee           Float           @default(0)
+  serviceFee            Float           @default(0)
+  totalAmount           Float
+  currency              String          @default("EUR")
+  estimatedDeliveryTime DateTime?
+  cancellationDeadline  DateTime?
+  cancellationReason    String?
+  specialInstructions   String?
+  deletedAt             DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime
+  userId                String
+  siteId                String
+  brandId               String
+  Delivery              Delivery?
+  FraudAlert            FraudAlert[]
+  Site                  Site            @relation(fields: [siteId], references: [id])
+  User                  User            @relation(fields: [userId], references: [id])
+  OrderItem             OrderItem[]
+  Payment               Payment?
+  Refund                Refund[]
+  SupportTicket         SupportTicket[]
+}
+
+model OrderItem {
+  id                   String            @id
+  quantity             Int
+  unitPrice            Float
+  productSnapshotName  String
+  productSnapshotPrice Float
+  specialInstructions  String?
+  deletedAt            DateTime?
+  orderId              String
+  productId            String
+  Product              Product           @relation(fields: [productId], references: [id])
+  Order                Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  OrderItemOption      OrderItemOption[]
+
+  @@index([orderId])
+}
+
+model OrderItemOption {
+  id              String    @id
+  optionGroupId   String
+  optionGroupName String
+  optionId        String
+  optionName      String
+  extraCost       Float
+  deletedAt       DateTime?
+  orderItemId     String
+  OrderItem       OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@index([orderItemId])
+}
+
+model Payment {
+  id              String    @id
+  amount          Float
+  currency        String    @default("EUR")
+  method          String
+  status          String    @default("PENDING")
+  transactionId   String?
+  tokenizedCardId String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  orderId         String    @unique
+  Order           Order     @relation(fields: [orderId], references: [id])
+  Refund          Refund[]
+}
+
+model PaymentMethod {
+  id             String   @id
+  type           String
+  lastFourDigits String?
+  expiryDate     String?
+  token          String
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  userId         String
+  User           User     @relation(fields: [userId], references: [id])
+}
+
+model Payout {
+  id             String    @id
+  amount         Float
+  currency       String    @default("EUR")
+  periodStart    DateTime
+  periodEnd      DateTime
+  status         String    @default("PENDING")
+  settlementDate DateTime?
+  invoiceUrl     String?
+  createdAt      DateTime  @default(now())
+  brandId        String
+  Brand          Brand     @relation(fields: [brandId], references: [id])
+}
+
+model Permission {
+  id               String             @id
+  module           String
+  roleId           String
+  Role             Role               @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  PermissionAction PermissionAction[]
+}
+
+model PermissionAction {
+  id           String     @id
+  value        String
+  permissionId String
+  Permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@index([permissionId])
+}
+
+model PointsTransaction {
+  id             String         @id
+  amount         Int
+  reason         String
+  orderId        String?
+  deletedAt      DateTime?
+  createdAt      DateTime       @default(now())
+  accountId      String
+  LoyaltyAccount LoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model Product {
+  id              String            @id
+  orderdisplay    Int               @default(0)
+  name            String
+  isMenu          Boolean           @default(false)
+  description     String?
+  price           Float
+  isAvailable     Boolean           @default(true)
+  nutriScore      String?
+  deletedAt       DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  brandId         String
+  CartItem        CartItem[]
+  Gallery         Gallery?
+  Menu            Menu?
+  MenuSectionItem MenuSectionItem[]
+  NutritionalInfo NutritionalInfo?
+  OptionGroup     OptionGroup[]
+  OrderItem       OrderItem[]
+  Brand           Brand             @relation(fields: [brandId], references: [id])
+  ProductAllergen ProductAllergen[]
+  ProductCategory ProductCategory[]
+  ProductScore    ProductScore[]
+  ProductStock    ProductStock[]
+  Recipe          Recipe?
+}
+
+model ProductAllergen {
+  id        String  @id
+  value     String
+  productId String
+  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductCategory {
+  id         String   @id
+  productId  String
+  categoryId String
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  Product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, categoryId])
+}
+
+model ProductScore {
+  id        String  @id
+  type      String
+  score     Float
+  productId String
+  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model ProductStock {
+  id                String  @id
+  quantityAvailable Int     @default(0)
+  threshold         Int     @default(10)
+  productId         String
+  siteId            String
+  Site              Site    @relation(fields: [siteId], references: [id])
+  Product           Product @relation(fields: [productId], references: [id])
+
+  @@index([productId, siteId])
+}
+
+model Profil {
+  id                String              @id
+  bio               String              @default("")
+  preferredLanguage String              @default("FR")
+  userId            String              @unique
+  phone             String
+  notifPush         Boolean             @default(true)
+  notifEmail        Boolean             @default(true)
+  notifSms          Boolean             @default(false)
+  User              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ProfilAllergy     ProfilAllergy[]
+  ProfilDietaryPref ProfilDietaryPref[]
+  Address           Address[]
+}
+
+model ProfilAllergy {
+  id       String @id
+  value    String
+  profilId String
+  Profil   Profil @relation(fields: [profilId], references: [id], onDelete: Cascade)
+
+  @@index([profilId])
+}
+
+model ProfilDietaryPref {
+  id       String @id
+  value    String
+  profilId String
+  Profil   Profil @relation(fields: [profilId], references: [id], onDelete: Cascade)
+
+  @@index([profilId])
+}
+
+model Promotion {
+  id            String          @id
+  code          String          @unique
+  type          String
+  value         Float
+  conditions    String?
+  startDate     DateTime
+  endDate       DateTime
+  maxUses       Int?
+  currentUses   Int             @default(0)
+  createdAt     DateTime        @default(now())
+  brandId       String
+  Brand         Brand           @relation(fields: [brandId], references: [id])
+  PromotionSite PromotionSite[]
+}
+
+model PromotionSite {
+  id          String    @id
+  promotionId String
+  siteId      String
+  Promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  @@index([promotionId])
+}
+
+model QualityCriterion {
+  id             String         @id
+  metric         String
+  threshold      Float
+  programId      String
+  QualityProgram QualityProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([programId])
+}
+
+model QualityProgram {
+  id                   String                 @id
+  name                 String
+  badgeIconUrl         String
+  startDate            DateTime
+  endDate              DateTime
+  createdAt            DateTime               @default(now())
+  QualityCriterion     QualityCriterion[]
+  QualityProgramWinner QualityProgramWinner[]
+}
+
+model QualityProgramWinner {
+  id             String         @id
+  programId      String
+  brandId        String
+  Brand          Brand          @relation(fields: [brandId], references: [id])
+  QualityProgram QualityProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@index([programId])
+}
+
+model RatingCriterion {
+  id       String @id
+  name     String
+  score    Float
+  reviewId String
+  Review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+}
+
+model Recipe {
+  id              String       @id
+  name            String
+  description     String?
+  difficulty      String       @default("medium")
+  preparationTime Int
+  cookingTime     Int
+  totalTime       Int
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime
+  productId       String       @unique
+  Ingredient      Ingredient[]
+  Product         Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Step            Step[]
+}
+
+model Referral {
+  id                                 String   @id
+  code                               String   @unique
+  status                             String   @default("SENT")
+  rewardGranted                      Boolean  @default(false)
+  createdAt                          DateTime @default(now())
+  referrerId                         String
+  referredUserId                     String?
+  User_Referral_referredUserIdToUser User?    @relation("Referral_referredUserIdToUser", fields: [referredUserId], references: [id])
+  User_Referral_referrerIdToUser     User     @relation("Referral_referrerIdToUser", fields: [referrerId], references: [id])
+}
+
+model Refund {
+  id          String    @id
+  amount      Float
+  currency    String    @default("EUR")
+  reason      String
+  status      String    @default("PENDING")
+  initiatedBy String
+  processedAt DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  orderId     String
+  paymentId   String
+  Payment     Payment   @relation(fields: [paymentId], references: [id])
+  Order       Order     @relation(fields: [orderId], references: [id])
+}
+
+model Review {
+  id              String            @id
+  targetType      String
+  targetId        String
+  globalRating    Float
+  comment         String?
+  photoUrl        String?
+  isAnonymous     Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime
+  authorId        String
+  RatingCriterion RatingCriterion[]
+  User            User              @relation(fields: [authorId], references: [id])
+  ReviewFlag      ReviewFlag[]
+}
+
+model ReviewFlag {
+  id         String   @id
+  reason     String
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  reviewId   String
+  reporterId String
+  User       User     @relation(fields: [reporterId], references: [id])
+  Review     Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+}
+
+model RoadmapItem {
+  id                  String                @id
+  title               String
+  description         String
+  quarter             String
+  status              String                @default("EN_REFLEXION")
+  updatedAt           DateTime
+  UserVoiceSuggestion UserVoiceSuggestion[]
+}
+
+model Role {
+  id         String       @id
+  name       String       @unique
+  Permission Permission[]
+  UserRole   UserRole[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+model Site {
+  id           String         @id
+  name         String
+  phone        String?
+  email        String?
+  isOpen       Boolean        @default(true)
+  deletedAt    DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  brandId      String
+  Address      Address?
+  Cart         Cart[]
+  DeliveryZone DeliveryZone[]
+  OpeningHours OpeningHours[]
+  Order        Order[]
+  ProductStock ProductStock[]
+  Brand        Brand          @relation(fields: [brandId], references: [id])
+}
+
+model Step {
+  id          String @id
+  order       Int
+  description String
+  recipeId    String
+  Recipe      Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@index([recipeId])
+}
+
+model SupportTicket {
+  id          String        @id
+  subject     String
+  status      String        @default("OPEN")
+  priority    String        @default("NORMAL")
+  deletedAt   DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  userId      String
+  orderId     String?
+  ChatMessage ChatMessage[]
+  Order       Order?        @relation(fields: [orderId], references: [id])
+  User        User          @relation(fields: [userId], references: [id])
+}
+
+model Survey {
+  id                  String                @id
+  title               String
+  description         String?
+  isActive            Boolean               @default(false)
+  createdAt           DateTime              @default(now())
+  SurveyQuestion      SurveyQuestion[]
+  SurveyTargetSegment SurveyTargetSegment[]
+}
+
+model SurveyQuestion {
+  id                   String                 @id
+  type                 String
+  text                 String
+  required             Boolean                @default(false)
+  surveyId             String
+  Survey               Survey                 @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  SurveyQuestionOption SurveyQuestionOption[]
+
+  @@index([surveyId])
+}
+
+model SurveyQuestionOption {
+  id             String         @id
+  value          String
+  questionId     String
+  SurveyQuestion SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+model SurveyTargetSegment {
+  id       String @id
+  value    String
+  surveyId String
+  Survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@index([surveyId])
+}
+
+model TaxRule {
+  id           String  @id
+  name         String
+  rate         Float
+  countryCode  String
+  applicableTo String
+  isActive     Boolean @default(true)
+}
+
+model TrackPoint {
+  id         String   @id
+  lat        Float
+  lng        Float
+  timestamp  DateTime @default(now())
+  deliveryId String
+  Delivery   Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId])
+}
+
+model User {
+  id                                     String                @id
+  name                                   String
+  email                                  String                @unique
+  emailVerified                          Boolean               @default(false)
+  image                                  String?
+  createdAt                              DateTime              @default(now())
+  updatedAt                              DateTime
+  deletedAt                              DateTime?
+  Account                                Account[]
+  Address                                Address[]
+  BlogPost                               BlogPost[]
+  Cart                                   Cart[]
+  Driver                                 Driver?
+  Favorite                               Favorite[]
+  Gallery                                Gallery[]
+  KycDocument                            KycDocument[]
+  LoyaltyAccount                         LoyaltyAccount?
+  Notification                           Notification[]
+  Order                                  Order[]
+  PaymentMethod                          PaymentMethod[]
+  Profil                                 Profil?
+  Referral_Referral_referredUserIdToUser Referral[]            @relation("Referral_referredUserIdToUser")
+  Referral_Referral_referrerIdToUser     Referral[]            @relation("Referral_referrerIdToUser")
+  Review                                 Review[]
+  ReviewFlag                             ReviewFlag[]
+  Session                                Session[]
+  SupportTicket                          SupportTicket[]
+  UserRole                               UserRole[]
+  UserVoiceComment                       UserVoiceComment[]
+  UserVoiceSuggestion                    UserVoiceSuggestion[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  Role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model UserVoiceComment {
+  id                  String              @id
+  content             String
+  createdAt           DateTime            @default(now())
+  suggestionId        String
+  authorId            String
+  User                User                @relation(fields: [authorId], references: [id])
+  UserVoiceSuggestion UserVoiceSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+
+  @@index([suggestionId])
+}
+
+model UserVoiceSuggestion {
+  id               String             @id
+  title            String
+  description      String
+  category         String
+  status           String             @default("SOUMISE")
+  votes            Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  authorId         String
+  roadmapItemId    String?
+  UserVoiceComment UserVoiceComment[]
+  RoadmapItem      RoadmapItem?       @relation(fields: [roadmapItemId], references: [id])
+  User             User               @relation(fields: [authorId], references: [id])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime
+
+  @@index([identifier])
+}

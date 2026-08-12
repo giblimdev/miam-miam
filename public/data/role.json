@@ -1,0 +1,112 @@
+[
+  {
+    "id": "role_super_admin",
+    "name": "SuperAdmin",
+    "permissions": [
+      "perm_orders_read",
+      "perm_orders_write",
+      "perm_orders_delete",
+      "perm_orders_cancel",
+      "perm_products_read",
+      "perm_products_write",
+      "perm_products_delete",
+      "perm_users_read",
+      "perm_users_write",
+      "perm_users_delete",
+      "perm_users_roles",
+      "perm_finance_read",
+      "perm_finance_write",
+      "perm_finance_refunds",
+      "perm_finance_payouts",
+      "perm_promotions_read",
+      "perm_promotions_write",
+      "perm_promotions_delete",
+      "perm_reviews_read",
+      "perm_reviews_write",
+      "perm_reviews_moderate",
+      "perm_deliveries_read",
+      "perm_deliveries_write",
+      "perm_deliveries_assign",
+      "perm_brands_read",
+      "perm_brands_write",
+      "perm_brands_delete",
+      "perm_support_read",
+      "perm_support_write",
+      "perm_support_resolve",
+      "perm_settings_read",
+      "perm_settings_write"
+    ]
+  },
+
+  {
+    "id": "role_brand_admin",
+    "name": "BrandAdmin",
+    "permissions": [
+      "perm_orders_read",
+      "perm_orders_write",
+      "perm_orders_cancel",
+      "perm_products_read",
+      "perm_products_write",
+      "perm_products_delete",
+      "perm_users_read",
+      "perm_promotions_read",
+      "perm_promotions_write",
+      "perm_promotions_delete",
+      "perm_reviews_read",
+      "perm_reviews_write",
+      "perm_deliveries_read",
+      "perm_deliveries_write",
+      "perm_brands_read",
+      "perm_brands_write",
+      "perm_support_read",
+      "perm_support_write"
+    ]
+  },
+  {
+    "id": "role_site_manager",
+    "name": "SiteManager",
+    "permissions": [
+      "perm_orders_read",
+      "perm_orders_write",
+      "perm_orders_cancel",
+      "perm_products_read",
+      "perm_products_write",
+      "perm_reviews_read",
+      "perm_reviews_write",
+      "perm_deliveries_read",
+      "perm_deliveries_write",
+      "perm_brands_read",
+      "perm_support_read",
+      "perm_support_write"
+    ]
+  },
+
+  {
+    "id": "role_driver",
+    "name": "Driver",
+    "permissions": [
+      "perm_orders_read",
+      "perm_orders_write",
+      "perm_deliveries_read",
+      "perm_deliveries_write",
+      "perm_support_read",
+      "perm_support_write"
+    ]
+  },
+ {
+    "id": "role_client",
+    "name": "Client",
+    "permissions": [
+      "perm_orders_read",
+      "perm_orders_write",
+      "perm_orders_cancel",
+      "perm_products_read",
+      "perm_reviews_read",
+      "perm_reviews_write",
+      "perm_deliveries_read",
+      "perm_brands_read",
+      "perm_support_read",
+      "perm_support_write"
+    ]
+  }
+]

@@ -1,0 +1,44 @@
+
+[
+  { "id": "perm_orders_read", "module": "orders", "actions": ["read"] },
+  { "id": "perm_orders_write", "module": "orders", "actions": ["read", "write"] },
+  { "id": "perm_orders_delete", "module": "orders", "actions": ["read", "write", "delete"] },
+  { "id": "perm_orders_cancel", "module": "orders", "actions": ["read", "write"] },
+
+  { "id": "perm_products_read", "module": "products", "actions": ["read"] },
+  { "id": "perm_products_write", "module": "products", "actions": ["read", "write"] },
+  { "id": "perm_products_delete", "module": "products", "actions": ["read", "write", "delete"] },
+
+  { "id": "perm_users_read", "module": "users", "actions": ["read"] },
+  { "id": "perm_users_write", "module": "users", "actions": ["read", "write"] },
+  { "id": "perm_users_delete", "module": "users", "actions": ["read", "write", "delete"] },
+  { "id": "perm_users_roles", "module": "users", "actions": ["read", "write"] },
+
+  { "id": "perm_finance_read", "module": "finance", "actions": ["read"] },
+  { "id": "perm_finance_write", "module": "finance", "actions": ["read", "write"] },
+  { "id": "perm_finance_refunds", "module": "finance", "actions": ["read", "write"] },
+  { "id": "perm_finance_payouts", "module": "finance", "actions": ["read", "write"] },
+
+  { "id": "perm_promotions_read", "module": "promotions", "actions": ["read"] },
+  { "id": "perm_promotions_write", "module": "promotions", "actions": ["read", "write"] },
+  { "id": "perm_promotions_delete", "module": "promotions", "actions": ["read", "write", "delete"] },
+
+  { "id": "perm_reviews_read", "module": "reviews", "actions": ["read"] },
+  { "id": "perm_reviews_write", "module": "reviews", "actions": ["read", "write"] },
+  { "id": "perm_reviews_moderate", "module": "reviews", "actions": ["read", "write", "delete"] },
+
+  { "id": "perm_deliveries_read", "module": "deliveries", "actions": ["read"] },
+  { "id": "perm_deliveries_write", "module": "deliveries", "actions": ["read", "write"] },
+  { "id": "perm_deliveries_assign", "module": "deliveries", "actions": ["read", "write"] },
+
+  { "id": "perm_brands_read", "module": "brands", "actions": ["read"] },
+  { "id": "perm_brands_write", "module": "brands", "actions": ["read", "write"] },
+  { "id": "perm_brands_delete", "module": "brands", "actions": ["read", "write", "delete"] },
+
+  { "id": "perm_support_read", "module": "support", "actions": ["read"] },
+  { "id": "perm_support_write", "module": "support", "actions": ["read", "write"] },
+  { "id": "perm_support_resolve", "module": "support", "actions": ["read", "write"] },
+
+  { "id": "perm_settings_read", "module": "settings", "actions": ["read"] },
+  { "id": "perm_settings_write", "module": "settings", "actions": ["read", "write"] }
+]

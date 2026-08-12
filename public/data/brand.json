@@ -1,0 +1,62 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "slug": "le-gourmet-popayan",
+    "name": "Le Gourmet Popayán",
+    "type": ["restaurant"],
+    "description": "Cuisine traditionnelle colombienne avec une touche contemporaine.",
+    "logo": "/logos/gourmet-popayan.png",
+    "Gallery": "/gourmet-popayan.jpg",
+    "website": "https://www.gourmetpopayan.com",
+    "createdAt": "2025-01-15T08:00:00Z",
+    "updatedAt": "2025-06-01T12:30:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "slug": "tienda-don-pedro",
+    "name": "Tienda Don Pedro",
+    "type": ["épicerie"],
+    "description": "Épicerie de quartier proposant des produits frais et locaux.",
+    "logo": "/logos/don-pedro.png",
+    "Gallery": "/don-pedro.jpg",
+    "website": "",
+    "createdAt": "2024-11-20T14:00:00Z",
+    "updatedAt": "2025-03-10T09:15:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440003",
+    "slug": "boutique-bella",
+    "name": "Boutique Bella",
+    "type": ["boutique"],
+    "description": "Vêtements et accessoires pour femmes, style urbain et chic.",
+    "logo": "/logos/bella.png",
+    "Gallery": "galleries/bella.jpg",
+    "website": "https://www.boutiquebella.co",
+    "createdAt": "2025-02-05T16:45:00Z",
+    "updatedAt": "2025-07-12T11:00:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440004",
+    "slug": "servirapido",
+    "name": "ServiRápido",
+    "type": ["service"],
+    "description": "Services de livraison express pour commerces et particuliers.",
+    "logo": "https://example.com/logos/servirapido.png",
+    "Gallery": "",
+    "website": "https://www.servirapido.com",
+    "createdAt": "2025-03-01T10:20:00Z",
+    "updatedAt": "2025-08-03T07:45:00Z"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440005",
+    "slug": "cafe-del-valle",
+    "name": "Café del Valle",
+    "type": ["restaurant", "café"],
+    "description": "Café de spécialité et pâtisseries artisanales dans une ambiance chaleureuse.",
+    "logo": "https://example.com/logos/cafe-del-valle.png",
+    "Gallery": "https://example.com/galleries/cafe-del-valle.jpg",
+    "website": "https://www.cafedelvalle.com",
+    "createdAt": "2025-04-10T07:30:00Z",
+    "updatedAt": "2025-09-01T14:00:00Z"
+  }
+]
