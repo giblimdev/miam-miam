@@ -14,10 +14,10 @@
    - lucide-react : Search, Pencil, Trash2, MapPin, Clock, Truck, Phone, Mail
    - @/lib/data/daysWeek : getDayShort
    - @/lib/utils : cn
- useBy : app/admin/brandManager/SiteManager.tsx
+ useBy : app/admin/brandManager/SiteManager.tsx 
 */
 
-/*
+/* 
  ARCHITECTURE & FLUX DE DONNÉES :
  - Rôle des sections :
    * Barre de filtres : champ de recherche textuelle + select marque + select statut.
@@ -408,7 +408,7 @@ export function SiteDisplay({
                   {/* Statut */}
                   <TableCell>
                     {site.deletedAt ? (
-                      <Badge variant="destructive" className="text-xs">
+                      <Badge  className="text-xs">
                         Supprimé
                       </Badge>
                     ) : site.isOpen ? (
@@ -428,7 +428,7 @@ export function SiteDisplay({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        className="h-8 w-8 text-orange-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                         aria-label={`Modifier ${site.name}`}
                         onClick={() => onEdit(site)}
                       >

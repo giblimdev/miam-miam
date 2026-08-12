@@ -6,17 +6,14 @@
    - prisma : @/lib/prisma
    - revalidatePath : next/cache
    - types : CreateSiteInput, UpdateSiteInput
-   - sonner : toast
- useBy : app/admin/siteManager/SiteManager.tsx
+ useBy : app/admin/siteManager/SiteManager.tsx, app/b2b/brandManager/SiteManager.tsx
 */
 
 'use server';
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { toast } from 'sonner';
 import type { CreateSiteInput, UpdateSiteInput } from '@/lib/validations/site';
-import { randomUUID } from 'crypto';
 
 /**
  * Récupère tous les sites d'une marque donnée.
@@ -32,8 +29,7 @@ export async function getSitesByBrand(brandId: string) {
     });
   } catch (error) {
     console.error(`Erreur lors de la récupération des sites de la marque ${brandId} :`, error);
-    toast.error('Erreur lors du chargement des sites');
-    throw error;
+    throw new Error('Erreur lors du chargement des sites');
   }
 }
 
@@ -44,18 +40,16 @@ export async function createSite(data: CreateSiteInput) {
   try {
     const site = await prisma.site.create({
       data: {
-        id: randomUUID(),
-        updatedAt: new Date(),
         ...data,
+        // L'ID est généré automatiquement par Prisma via @default(cuid())
+        // Pas besoin de le générer manuellement
       },
     });
     revalidatePath('/admin/siteManager');
-    toast.success(`Site "${site.name}" créé avec succès !`);
     return site;
   } catch (error) {
     console.error('Erreur lors de la création du site :', error);
-    toast.error('Erreur lors de la création du site');
-    throw error;
+    throw new Error('Erreur lors de la création du site');
   }
 }
 
@@ -72,12 +66,10 @@ export async function updateSite(id: string, data: UpdateSiteInput) {
       },
     });
     revalidatePath('/admin/siteManager');
-    toast.success(`Site "${site.name}" mis à jour avec succès !`);
     return site;
   } catch (error) {
     console.error(`Erreur lors de la mise à jour du site ${id} :`, error);
-    toast.error('Erreur lors de la mise à jour du site');
-    throw error;
+    throw new Error('Erreur lors de la mise à jour du site');
   }
 }
 
@@ -92,12 +84,10 @@ export async function deleteSite(id: string) {
       select: { name: true },
     });
     revalidatePath('/admin/siteManager');
-    toast.success(`Site "${site.name}" supprimé avec succès !`);
     return site;
   } catch (error) {
     console.error(`Erreur lors de la suppression du site ${id} :`, error);
-    toast.error('Erreur lors de la suppression du site');
-    throw error;
+    throw new Error('Erreur lors de la suppression du site');
   }
 }
 
@@ -112,11 +102,9 @@ export async function restoreSite(id: string) {
       select: { name: true },
     });
     revalidatePath('/admin/siteManager');
-    toast.success(`Site "${site.name}" restauré avec succès !`);
     return site;
   } catch (error) {
     console.error(`Erreur lors de la restauration du site ${id} :`, error);
-    toast.error('Erreur lors de la restauration du site');
-    throw error;
+    throw new Error('Erreur lors de la restauration du site');
   }
 }

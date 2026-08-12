@@ -1,33 +1,30 @@
-//@ /app/admin/productManager/ProductDisplay.tsx
+//@ /app/admin/brandManager/ProductDisplay.tsx
 /*
- role : Affiche la liste des produits dans un tableau responsive avec recherche,
+ Rôle : Affiche la liste des produits dans un tableau responsive avec recherche,
         filtre par disponibilité et actions (modifier, supprimer). Reçoit les données
-        en props depuis ProductManager.tsx. Inclut une zone de texte JSON copiable
-        pour sauvegarde manuelle (même logique que BrandDisplay.tsx).
- import:
+        en props depuis ProductManager.tsx. Affiche le slug sous le nom du produit.
+        Inclut une zone de texte JSON copiable et un extrait de code coloré
+        (type TypeScript + modèle Prisma) via react-syntax-highlighter.
+ Importe :
    - React : useState, useMemo, useCallback
-   - shadcn/ui : Table, Badge, Input, Select, Button, Textarea
-   - lucide-react : Search, Pencil, Trash2, Package, Copy, Check
+   - shadcn/ui : Table, Badge, Input, Select, Button, Textarea, Skeleton, Card
+   - lucide-react : Search, Pencil, Trash2, Package, Copy, Check, Code2
+   - react-syntax-highlighter : Prism as SyntaxHighlighter, thème oneDark
    - @/lib/utils : cn
    - @/lib/generated/prisma/client : type Product
    - sonner : toast
- useBy : app/admin/productManager/ProductManager.tsx
+ Utilisé par : app/admin/brandManager/ProductManager.tsx
 */
-
 /*
  ARCHITECTURE & FLUX DE DONNÉES :
- - Rôle des sections :
-   * Barre de filtres : recherche textuelle (nom/description) + select disponibilité.
-   * Tableau : nom, prix, menu/produit simple, nutriScore, disponibilité, actions.
-   * Zone de sauvegarde manuelle : textarea JSON copiable.
- - Choix techniques :
-   * Client Component ('use client') pour l'état local de recherche/filtre.
-   * Typage `Product` scalaire (Prisma) : suffisant, aucune relation nécessaire ici.
-   * Filtrage memoïsé avec useMemo.
- - Flux de données :
-   * products (props) → filteredProducts (useMemo selon search + availability) → rendu tableau.
-   * products (props) → JSON.stringify → textarea de sauvegarde manuelle.
-   * Actions : onEdit(product) et onDelete(product) remontent au parent.
+ - Barre de filtres : recherche textuelle (nom/description/slug) + select disponibilité.
+ - Tableau : nom (avec slug), prix, menu/produit simple, nutriScore, disponibilité, actions.
+ - Extrait de code : affiche le type TypeScript et le modèle Prisma de Product avec coloration syntaxique.
+ - Zone de sauvegarde manuelle : textarea JSON copiable.
+ - Filtrage memoïsé avec useMemo.
+ - Skeleton loading pour l'état de chargement.
+ - Actions : onEdit(product) et onDelete(product) remontent au parent.
+ - États vides distincts pour "aucun produit" et "aucun résultat de recherche".
 */
 
 'use client';
@@ -44,6 +41,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -52,13 +50,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, Pencil, Trash2, Package, Copy, Check } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Search, Pencil, Trash2, Package, Copy, Check, Code2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { Product } from '@/lib/generated/prisma/client';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // ------------------------------------------------------------
-// Props
+// Types et constantes
 // ------------------------------------------------------------
 
 interface ProductDisplayProps {
@@ -76,20 +77,66 @@ const NUTRISCORE_COLORS: Record<string, string> = {
   E: 'bg-red-100 text-red-700',
 };
 
+type AvailabilityFilter = 'ALL' | 'AVAILABLE' | 'UNAVAILABLE';
+
+const PRODUCT_TYPE_EXCERPT = `type Product = {
+  id: string;
+  orderdisplay: number;
+  name: string;
+  slug: string;
+  isMenu: boolean;
+  description: string | null;
+  price: number;
+  isAvailable: boolean;
+  nutriScore: string | null;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  brandId: string;
+  categoryAssignments: CategoryAssignmentProduct[];
+  productSpecs: ProductSpec[];
+}`;
+
+const PRISMA_MODEL_EXCERPT = `model Product {
+  id              String    @id @default(cuid())
+  orderdisplay    Int       @default(0)
+  name            String
+  slug            String    @unique
+  isMenu          Boolean   @default(false)
+  description     String?
+  price           Float
+  isAvailable     Boolean   @default(true)
+  nutriScore      String?
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  brandId         String
+  Brand           Brand     @relation(fields: [brandId], references: [id])
+  categoryAssignments CategoryAssignmentProduct[]
+  productSpecs    ProductSpec[]
+}`;
+
 // ------------------------------------------------------------
-// Composant
+// Composant principal
 // ------------------------------------------------------------
 
-export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }: ProductDisplayProps) {
+export function ProductDisplay({
+  products,
+  isLoading = false,
+  onEdit,
+  onDelete,
+}: ProductDisplayProps) {
   const [search, setSearch] = useState('');
-  const [availabilityFilter, setAvailabilityFilter] = useState<'ALL' | 'AVAILABLE' | 'UNAVAILABLE'>('ALL');
+  const [availabilityFilter, setAvailabilityFilter] = useState<AvailabilityFilter>('ALL');
   const [copied, setCopied] = useState(false);
+  const [copiedExcerpt, setCopiedExcerpt] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch =
         search === '' ||
         product.name.toLowerCase().includes(search.toLowerCase()) ||
+        product.slug.toLowerCase().includes(search.toLowerCase()) ||
         (product.description ?? '').toLowerCase().includes(search.toLowerCase());
 
       const matchesAvailability =
@@ -114,6 +161,18 @@ export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }
     }
   }, [productsJson]);
 
+  const handleCopyExcerpt = useCallback(async () => {
+    const excerpt = `${PRODUCT_TYPE_EXCERPT}\n\n${PRISMA_MODEL_EXCERPT}`;
+    try {
+      await navigator.clipboard.writeText(excerpt);
+      setCopiedExcerpt(true);
+      toast.success('Extrait de code copié');
+      setTimeout(() => setCopiedExcerpt(false), 2000);
+    } catch {
+      toast.error('Impossible de copier l’extrait de code');
+    }
+  }, []);
+
   const formatPrice = useCallback((price: number): string => {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price);
   }, []);
@@ -125,13 +184,46 @@ export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }
   }, []);
 
   // ----------------------------------------------------------
-  // Rendu : chargement / liste vide
+  // État de chargement avec skeleton
   // ----------------------------------------------------------
-
   if (isLoading) {
-    return <p className="text-sm text-gray-500 dark:text-gray-400">Chargement des produits...</p>;
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Skeleton className="h-10 flex-1" />
+          <Skeleton className="h-10 w-[200px]" />
+        </div>
+        <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <Table>
+            <TableHeader className="bg-gray-50 dark:bg-gray-800">
+              <TableRow>
+                {Array.from({ length: 7 }).map((_, index) => (
+                  <TableHead key={`skeleton-head-${index}`}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 5 }).map((_, rowIndex) => (
+                <TableRow key={`skeleton-row-${rowIndex}`}>
+                  {Array.from({ length: 7 }).map((_, colIndex) => (
+                    <TableCell key={`skeleton-cell-${rowIndex}-${colIndex}`}>
+                      <Skeleton className="h-5 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
   }
 
+  // ----------------------------------------------------------
+  // Aucun produit disponible
+  // ----------------------------------------------------------
   if (products.length === 0) {
     return (
       <div className="rounded-lg border border-dashed border-gray-300 dark:border-gray-600 p-12 text-center">
@@ -149,7 +241,6 @@ export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }
   // ----------------------------------------------------------
   // Rendu principal
   // ----------------------------------------------------------
-
   return (
     <div className="space-y-4">
       {/* Barre de recherche et filtre */}
@@ -157,7 +248,7 @@ export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
-            placeholder="Rechercher par nom ou description..."
+            placeholder="Rechercher par nom, slug ou description..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 bg-white/80 backdrop-blur-sm border-slate-200 focus-visible:ring-indigo-400"
@@ -165,7 +256,7 @@ export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }
         </div>
         <Select
           value={availabilityFilter}
-          onValueChange={(v) => setAvailabilityFilter(v as typeof availabilityFilter)}
+          onValueChange={(v) => setAvailabilityFilter(v as AvailabilityFilter)}
         >
           <SelectTrigger className="w-[200px] bg-white/80 backdrop-blur-sm">
             <SelectValue placeholder="Disponibilité" />
@@ -213,7 +304,12 @@ export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }
                   )}
                 >
                   <TableCell className="font-medium text-gray-800 dark:text-gray-100">
-                    {product.name}
+                    <div className="flex flex-col">
+                      <span>{product.name}</span>
+                      <span className="font-mono text-xs text-gray-500 dark:text-gray-400">
+                        {product.slug}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
                     <p className="text-sm text-gray-600 dark:text-gray-300 max-w-xs">
@@ -276,6 +372,47 @@ export function ProductDisplay({ products, isLoading = false, onEdit, onDelete }
           </Table>
         </div>
       )}
+
+      {/* Extrait de code : type TypeScript et modèle Prisma */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <Code2 className="h-4 w-4" />
+            Référence du modèle Product
+          </CardTitle>
+          <Button variant="outline" size="sm" onClick={handleCopyExcerpt} className="gap-1.5">
+            {copiedExcerpt ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                Copié
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5" />
+                Copier
+              </>
+            )}
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <SyntaxHighlighter
+            language="typescript"
+            style={oneDark}
+            showLineNumbers
+            customStyle={{ borderRadius: '0.5rem', fontSize: '0.75rem', margin: 0 }}
+          >
+            {PRODUCT_TYPE_EXCERPT}
+          </SyntaxHighlighter>
+          <SyntaxHighlighter
+            language="typescript"
+            style={oneDark}
+            showLineNumbers
+            customStyle={{ borderRadius: '0.5rem', fontSize: '0.75rem', margin: 0 }}
+          >
+            {PRISMA_MODEL_EXCERPT}
+          </SyntaxHighlighter>
+        </CardContent>
+      </Card>
 
       {/* Zone de sauvegarde manuelle : JSON brut copiable */}
       <div className="space-y-2 rounded-lg border border-gray-200 dark:border-gray-700 p-4">

@@ -17,7 +17,7 @@ interface SlugifyOptions {
   lowercase?: boolean;
   /** Longueur maximale du slug (défaut: 100) */
   maxLength?: number;
-  /** Supprime les stop words français (défaut: false) */
+  /** Supprime les stop words français (défaut: false) */ 
   removeStopWords?: boolean;
 }
 

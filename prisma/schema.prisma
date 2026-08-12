@@ -308,21 +308,27 @@ model OpeningHours {
 // 5. PRODUITS & MENUS
 // ============================================================
 
+// ==========================================
+// PRODUIT
+// ==========================================
 model Product {
-  id              String            @id @default(cuid())
-  orderdisplay    Int               @default(0)
+  id              String   @id @default(cuid())
+  orderdisplay    Int      @default(0)
   name            String
-  slug            String
-  isMenu          Boolean           @default(false)
+  slug            String   @unique // 
+  isMenu          Boolean  @default(false)
   description     String?
   price           Float
-  isAvailable     Boolean           @default(true)
+  isAvailable     Boolean  @default(true)
   nutriScore      String?
   deletedAt       DateTime?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  brandId         String
-  Brand           Brand             @relation(fields: [brandId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  brandId String
+  brand   Brand   @relation(fields: [brandId], references: [id])
+
+  // Relations existantes
   CartItem        CartItem[]
   Gallery         Gallery?
   Menu            Menu?
@@ -335,39 +341,64 @@ model Product {
   ProductStock    ProductStock[]
   Recipe          Recipe?
 
-  // Relation many-to-many via la table de liaison
+  // Liaison many-to-many avec les catégories
   categoryAssignments CategoryAssignmentProduct[]
+
+  // Spécifications produit (table dédiée)
+  productSpecs ProductSpec[]
 }
 
 // ==========================================
-// L'ENTITÉ : Les catégories de produits
+// CATÉGORIES (avec sous-catégories auto-référencées)
 // ==========================================
 model CategoryProduct {
-  id           String @id @default(cuid())
-  name         String // "Entrées", "Plats", "Desserts"
-  categoryType String // "FOOD", "DRINK", "MENU"
-  orderdisplay Int    @default(0)
-  description  String @default("")
+  id           String  @id @default(cuid())
+  name         String
+  categoryType String  // ex: "FOOD", "DRINK", "MENU", "CLEANING", "PACK"
+  orderdisplay Int     @default(0)
+  description  String  @default("")
   image        String?
 
-  // Relation many-to-many via la table de liaison
+  // Hiérarchie parent/enfant
+  parentId String?
+  parent   CategoryProduct?  @relation("CategoryChildren", fields: [parentId], references: [id], onDelete: SetNull)
+  children CategoryProduct[] @relation("CategoryChildren")
+
+  // Liaison many-to-many avec les produits
   productAssignments CategoryAssignmentProduct[]
+
+  @@index([parentId])
 }
 
 // ==========================================
-// LA TABLE DE LIAISON : Produit ↔ Catégorie
+// TABLE DE LIAISON : Produit ↔ Catégorie
 // ==========================================
 model CategoryAssignmentProduct {
-  id                String @id @default(cuid()) // ou uuid() selon votre préférence
+  id                String @id @default(cuid())
   productId         String
   categoryProductId String
 
-  // Relations
-  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  categoryProduct CategoryProduct @relation(fields: [categoryProductId], references: [id], onDelete: Cascade)
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryProduct  CategoryProduct @relation(fields: [categoryProductId], references: [id], onDelete: Cascade)
 
-  // Contrainte d'unicité pour éviter les doublons
   @@unique([productId, categoryProductId])
+  @@index([productId])
+  @@index([categoryProductId])
+}
+
+// ==========================================
+// SPÉCIFICATIONS PRODUIT
+// ==========================================
+model ProductSpec {
+  id        String  @id @default(cuid())
+  label     String  // ex: "Poids", "Volume", "Matière", "Température de conservation"
+  value     String  // ex: "500g", "1L", "Coton", "4°C"
+  unit      String? // ex: "g", "ml", "cm"
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
 
 model ProductAllergen {
@@ -387,18 +418,6 @@ model ProductScore {
   Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
-}
-
-model ProductStock {
-  id                String  @id @default(cuid())
-  quantityAvailable Int     @default(0)
-  threshold         Int     @default(10)
-  productId         String
-  siteId            String
-  Site              Site    @relation(fields: [siteId], references: [id])
-  Product           Product @relation(fields: [productId], references: [id])
-
-  @@index([productId, siteId])
 }
 
 model NutritionalInfo {
@@ -479,6 +498,18 @@ model MenuSectionItem {
   MenuSection   MenuSection @relation(fields: [menuSectionId], references: [id], onDelete: Cascade)
 
   @@index([menuSectionId])
+}
+
+model ProductStock {
+  id                String  @id @default(cuid())
+  quantityAvailable Int     @default(0)
+  threshold         Int     @default(10)
+  productId         String
+  siteId            String
+  Site              Site    @relation(fields: [siteId], references: [id])
+  Product           Product @relation(fields: [productId], references: [id])
+
+  @@index([productId, siteId])
 }
 
 // ----- RECETTES -----

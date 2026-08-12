@@ -113,6 +113,8 @@ Chaque fichier généré DOIT impérativement commencer par ce bloc de commentai
 /*
  role : [Description claire des responsabilités principales de ce script/composant/page]
  import: [Liste des bibliothèques externes, hooks, composants shadcn/ui, types ou services]
+ props transmise :[]
+ props recus []
  useBy : [Liste des pages, composants, layouts ou API routes qui consomment/appellent ce fichier]
 */
 

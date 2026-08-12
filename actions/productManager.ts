@@ -6,26 +6,23 @@
    - prisma : @/lib/prisma
    - revalidatePath : next/cache
    - types : CreateProductInput, UpdateProductInput
-   - sonner : toast
- useBy : app/admin/productManager/ProductManager.tsx
+ useBy : app/admin/productManager/ProductManager.tsx, app/b2b/brandManager/ProductManager.tsx
 */
 
 'use server';
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { toast } from 'sonner';
 import type { CreateProductInput, UpdateProductInput } from '@/lib/validations/product';
-import { randomUUID } from 'crypto';
 
-// Fonction utilitaire pour générer un slug unique
+// Fonction utilitaire pour générer un slug (sans suffixe aléatoire)
 function generateSlug(name: string): string {
-  const baseSlug = name
+  return name
     .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // supprime les accents
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
-  const suffix = randomUUID().slice(0, 6);
-  return `${baseSlug}-${suffix}`;
 }
 
 /**
@@ -39,8 +36,7 @@ export async function getProductsByBrand(brandId: string) {
     });
   } catch (error) {
     console.error(`Erreur lors de la récupération des produits de la marque ${brandId} :`, error);
-    toast.error('Erreur lors du chargement des produits');
-    throw error;
+    throw new Error('Erreur lors du chargement des produits');
   }
 }
 
@@ -53,19 +49,17 @@ export async function createProduct(data: CreateProductInput) {
 
     const product = await prisma.product.create({
       data: {
-        id: randomUUID(),
-        updatedAt: new Date(),
         slug,
         ...data,
+        updatedAt: new Date(),
+        // L'ID est généré automatiquement par Prisma (@default(cuid()))
       },
     });
     revalidatePath('/admin/productManager');
-    toast.success(`Produit "${product.name}" créé avec succès !`);
     return product;
   } catch (error) {
     console.error('Erreur lors de la création du produit :', error);
-    toast.error('Erreur lors de la création du produit');
-    throw error;
+    throw new Error('Erreur lors de la création du produit');
   }
 }
 
@@ -85,12 +79,10 @@ export async function updateProduct(id: string, data: UpdateProductInput) {
       },
     });
     revalidatePath('/admin/productManager');
-    toast.success(`Produit "${product.name}" mis à jour avec succès !`);
     return product;
   } catch (error) {
     console.error(`Erreur lors de la mise à jour du produit ${id} :`, error);
-    toast.error('Erreur lors de la mise à jour du produit');
-    throw error;
+    throw new Error('Erreur lors de la mise à jour du produit');
   }
 }
 
@@ -105,10 +97,9 @@ export async function deleteProduct(id: string) {
       select: { name: true },
     });
     revalidatePath('/admin/productManager');
-    toast.success(`Produit "${product.name}" supprimé avec succès !`);
+    return product;
   } catch (error) {
     console.error(`Erreur lors de la suppression du produit ${id} :`, error);
-    toast.error('Erreur lors de la suppression du produit');
-    throw error;
+    throw new Error('Erreur lors de la suppression du produit');
   }
 }

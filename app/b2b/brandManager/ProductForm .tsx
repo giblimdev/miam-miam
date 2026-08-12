@@ -1,37 +1,26 @@
-//@ /app/admin/productManager/ProductForm.tsx
+//@ /app/admin/brandManager/ProductForm.tsx
 /*
- role : Formulaire de création/édition d'un produit, dans un Dialog.
-        Même principe que SiteForm.tsx : react-hook-form + zod.
- import:
+ Rôle : Formulaire de création/édition d'un produit, dans un Dialog.
+        Utilise react-hook-form + zod pour la validation.
+ Importe :
    - react-hook-form : useForm
    - @hookform/resolvers/zod : zodResolver
    - zod : z (schéma local, aligné sur createProductSchema/updateProductSchema)
    - server actions : @/actions/productManager (createProduct, updateProduct)
    - shadcn/ui : Dialog, Input, Label, Switch, Select, Textarea, Button
-   - sonner : toast
    - @/lib/generated/prisma/client : type Product
- useBy : app/admin/productManager/ProductManager.tsx
+ Utilisé par : app/admin/brandManager/ProductManager.tsx
 */
-
 /*
  ARCHITECTURE & FLUX DE DONNÉES :
- - Rôle des sections :
-   * Schéma local `productFormSchema` : validation côté client, calquée sur
-     createProductSchema/updateProductSchema (lib/validations/product.ts) mais sans
-     brandId (passé en prop, pas saisi par l'utilisateur).
-   * useForm : gère l'état du formulaire, la validation et les erreurs inline.
-   * handleFormSubmit : appelle createProduct ou updateProduct selon la présence de `product`,
-     puis déclenche onSuccess (refetch côté parent) et ferme le Dialog.
- - Choix techniques :
-   * Client Component ('use client'), formulaire contrôlé par react-hook-form.
-   * Mode création vs édition déterminé par la prop `product` (null/undefined = création).
-   * `reset()` appelé à chaque ouverture pour repartir des bonnes valeurs par défaut.
-   * `price` saisi en input number, converti en Float ; `nutriScore` en select A-E (optionnel).
-   * Catégories (CategoryProduct) et stock par site (ProductStock) hors scope de ce
-     formulaire — extension future, sur le même principe si besoin.
- - Flux de données :
-   * Props (open, product, brandId, onOpenChange, onSuccess) → useForm (defaultValues)
-   * submit → createProduct/updateProduct (server action) → toast → onSuccess() → onOpenChange(false)
+ - Schéma local `productFormSchema` : validation côté client.
+ - useForm : gère l'état, la validation et les erreurs inline.
+ - handleFormSubmit : appelle createProduct ou updateProduct selon le mode,
+   puis déclenche onSuccess et ferme le Dialog.
+ - Mode création/édition déterminé par la prop `product`.
+ - `reset()` appelé à chaque ouverture pour repartir des bonnes valeurs.
+ - `price` en input number avec `valueAsNumber`, `nutriScore` en select A-E (optionnel).
+ - Catégories et stock par site hors scope de ce formulaire.
 */
 
 'use client';
@@ -69,11 +58,11 @@ import type { Product } from '@/lib/generated/prisma/client';
 const productFormSchema = z.object({
   name: z.string().min(1, 'Le nom est requis'),
   description: z.string().optional(),
-  price: z.coerce.number().min(0, 'Le prix doit être positif ou nul'),
+  price: z.number().min(0, 'Le prix doit être positif ou nul'),
   isMenu: z.boolean(),
   isAvailable: z.boolean(),
   nutriScore: z.enum(['A', 'B', 'C', 'D', 'E', 'NONE']),
-  orderdisplay: z.coerce.number().int(),
+  orderdisplay: z.number().int(),
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -95,11 +84,8 @@ const EMPTY_VALUES: ProductFormValues = {
 interface ProductFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Marque à laquelle le produit sera rattaché (création) */
   brandId: string;
-  /** Produit à éditer ; absent/null = mode création */
   product?: Product | null;
-  /** Callback après sauvegarde réussie (ex: refetch côté parent) */
   onSuccess?: () => void;
 }
 
@@ -122,9 +108,6 @@ export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }:
     defaultValues: EMPTY_VALUES,
   });
 
-  /**
-   * Réinitialise le formulaire à chaque ouverture, selon le mode (création/édition).
-   */
   useEffect(() => {
     if (!open) return;
     reset(
@@ -146,9 +129,6 @@ export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }:
   const isAvailableValue = watch('isAvailable');
   const nutriScoreValue = watch('nutriScore');
 
-  /**
-   * Soumission : création ou mise à jour selon le mode.
-   */
   const onSubmit = async (values: ProductFormValues) => {
     try {
       const payload = {
@@ -197,12 +177,23 @@ export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }:
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="product-price">Prix (€)</Label>
-              <Input id="product-price" type="number" step="0.01" min="0" {...register('price')} />
+              <Input
+                id="product-price"
+                type="number"
+                step="0.01"
+                min="0"
+                {...register('price', { valueAsNumber: true })}
+              />
               {errors.price && <p className="text-xs text-red-600">{errors.price.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="product-orderdisplay">Ordre d'affichage</Label>
-              <Input id="product-orderdisplay" type="number" step="1" {...register('orderdisplay')} />
+              <Input
+                id="product-orderdisplay"
+                type="number"
+                step="1"
+                {...register('orderdisplay', { valueAsNumber: true })}
+              />
             </div>
           </div>
 

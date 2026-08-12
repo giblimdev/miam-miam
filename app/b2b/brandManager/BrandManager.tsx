@@ -100,7 +100,10 @@ export default function BrandManager() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Marques</h2>
-        <Button onClick={handleCreate}>
+        <Button
+          onClick={handleCreate}
+          className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg hover:shadow-orange-500/25 transition-all"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Nouvelle marque
         </Button>
@@ -151,6 +154,7 @@ export default function BrandManager() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(brand)}
+                    className="border-orange-200 hover:border-orange-400 hover:bg-orange-50 hover:text-orange-600"
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -159,6 +163,7 @@ export default function BrandManager() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleRestore(brand.id, brand.name)}
+                      className="border-orange-200 hover:border-orange-400 hover:bg-orange-50 hover:text-orange-600"
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -167,6 +172,7 @@ export default function BrandManager() {
                       variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(brand.id, brand.name)}
+                      className="bg-red-500 hover:bg-red-600"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
