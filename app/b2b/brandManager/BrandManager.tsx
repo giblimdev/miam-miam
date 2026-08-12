@@ -1,81 +1,36 @@
-//@ /app/admin/brandManager/BrandManager.tsx
-/*
- role : Page d'administration des marques. Charge la liste via server action,
-        délègue l'affichage à BrandDisplay et le formulaire à BrandForm (dialog).
-        Point d'entrée de la hiérarchie Brand → Site → Product.
- import:
-   - React : useState, useEffect, useCallback
-   - server actions : @/actions/brandManager (getBrands, deleteBrand)
-   - ./BrandDisplay, ./BrandForm
-   - lucide-react : Plus
-   - shadcn/ui : Button
-   - sonner : toast
-   - @/lib/generated/prisma/client : type Brand
- useBy : app/admin/brandManager/page.tsx
-*/
-
-/*
- ARCHITECTURE & FLUX DE DONNÉES :
- - Rôle des sections :
-   * Orchestration : charge/recharge les marques, ouvre le formulaire (création/édition).
- - Interactions UX :
-   * Toast sonner en cas d’erreur de chargement.
-*/
-
+// app/b2b/brandManager/BrandManager.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getBrands, deleteBrand } from '@/actions/brandManager';
-import { BrandDisplay } from './BrandDisplay';
-import { BrandForm } from './BrandForm';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { getBrands, deleteBrand, restoreBrand } from '@/actions/brandManager';
+import { BrandForm } from './BrandForm';
+import { useBrandStore } from '@/stores/useBrandStore';
 import type { Brand } from '@/lib/generated/prisma/client';
 
-// ------------------------------------------------------------
-// Types
-// ------------------------------------------------------------
+type BrandWithRelations = Brand & {
+  BrandType: { value: string }[];
+  Site: { id: string; name: string }[];
+};
 
-/**
- * Représentation d'une marque enrichie des relations retournées par le server action.
- * Étend le type Prisma de base pour garantir la compatibilité avec l'affichage.
- */
-export interface BrandWithRelations extends Brand {
-  /** Le champ type est toujours un tableau de chaînes après transformation */
-  type: string[];
-  /** Types de marque (objets complets) */
-  BrandType?: { id: string; value: string }[];
-  /** Sites associés (références légères) */
-  Site?: { id: string; name: string }[];
-  /** Produits associés (références légères) */
-  Product?: { id: string; name: string; price: number }[];
-}
-
-// ------------------------------------------------------------
-// Composant
-// ------------------------------------------------------------
-
-export function BrandManager() {
+export default function BrandManager() {
+  const setSelectedBrand = useBrandStore((state) => state.setSelectedBrand);
   const [brands, setBrands] = useState<BrandWithRelations[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingBrand, setEditingBrand] = useState<BrandWithRelations | null>(null);
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<BrandWithRelations | null>(null);
-
-  /**
-   * Recharge la liste complète des marques depuis le serveur.
-   */
   const loadBrands = useCallback(async () => {
-    setIsLoading(true);
     try {
+      setLoading(true);
       const data = await getBrands();
       setBrands(data as BrandWithRelations[]);
-    } catch {
+    } catch (error) {
       toast.error('Erreur lors du chargement des marques');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, []);
 
@@ -83,64 +38,145 @@ export function BrandManager() {
     loadBrands();
   }, [loadBrands]);
 
-  /**
-   * Ouvre le formulaire en mode création ou édition.
-   * @param brand - Optionnel, la marque à éditer (si absente, création)
-   */
-  const openForm = useCallback((brand?: BrandWithRelations) => {
-    setEditTarget(brand ?? null);
-    setFormOpen(true);
-  }, []);
+  const handleBrandClick = (brandId: string, brandName: string) => {
+    setSelectedBrand(brandId, brandName);
+  };
 
-  /**
-   * Supprime une marque après confirmation (dialog interne à BrandDisplay)
-   * et recharge la liste.
-   * @param brandId - Identifiant de la marque à supprimer
-   */
-  const handleDelete = useCallback(
-    async (brandId: string) => {
-      setIsDeleting(true);
+  const handleCreate = () => {
+    setEditingBrand(null);
+    setShowForm(true);
+  };
+
+  const handleEdit = (brand: BrandWithRelations) => {
+    setEditingBrand(brand);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (confirm(`Supprimer la marque "${name}" ?`)) {
       try {
-        await deleteBrand(brandId);
+        await deleteBrand(id);
+        toast.success(`Marque "${name}" supprimée`);
         await loadBrands();
-      } finally {
-        setIsDeleting(false);
+        // Si la marque supprimée était sélectionnée, on la désélectionne
+        const store = useBrandStore.getState();
+        if (store.selectedBrandId === id) {
+          setSelectedBrand(null, null);
+        }
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
       }
-    },
-    [loadBrands]
-  );
+    }
+  };
 
-  // ----------------------------------------------------------
-  // Rendu
-  // ----------------------------------------------------------
+  const handleRestore = async (id: string, name: string) => {
+    if (confirm(`Restaurer la marque "${name}" ?`)) {
+      try {
+        await restoreBrand(id);
+        toast.success(`Marque "${name}" restaurée`);
+        await loadBrands();
+      } catch (error) {
+        toast.error('Erreur lors de la restauration');
+      }
+    }
+  };
+
+  const handleSuccess = async () => {
+    setShowForm(false);
+    setEditingBrand(null);
+    await loadBrands();
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingBrand(null);
+  };
+
+  if (loading && brands.length === 0) {
+    return <div className="flex justify-center p-8">Chargement...</div>;
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">Marques</h2>
-        <Button size="sm" className="gap-1.5" onClick={() => openForm()}>
-          <Plus className="h-4 w-4" />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Marques</h2>
+        <Button onClick={handleCreate}>
+          <Plus className="h-4 w-4 mr-2" />
           Nouvelle marque
         </Button>
       </div>
 
-      {isLoading ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400">Chargement des marques...</p>
-      ) : (
-        <BrandDisplay
-          brands={brands}
-          onEdit={openForm}
-          onDelete={handleDelete}
-          isDeleting={isDeleting}
-        />
+      {showForm && (
+        <div className="border rounded-lg p-6 bg-card">
+          <BrandForm
+            initialData={editingBrand ? {
+              id: editingBrand.id,
+              name: editingBrand.name,
+              slug: editingBrand.slug,
+              description: editingBrand.description,
+              logo: editingBrand.logo || '',
+              website: editingBrand.website || '',
+              type: editingBrand.BrandType.map(t => t.value),
+            } : undefined}
+            onSuccess={handleSuccess}
+            onCancel={handleCancel}
+          />
+        </div>
       )}
 
-      <BrandForm
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        brand={editTarget}
-        onSuccess={loadBrands}
-      />
+      <div className="border rounded-lg">
+        {brands.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            Aucune marque trouvée
+          </div>
+        ) : (
+          <div className="divide-y">
+            {brands.map((brand) => (
+              <div
+                key={brand.id}
+                className="flex items-center justify-between p-4 hover:bg-muted/50 cursor-pointer"
+                onClick={() => handleBrandClick(brand.id, brand.name)}
+              >
+                <div>
+                  <div className="font-medium">{brand.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {brand.BrandType.map(t => t.value).join(', ')}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {brand.Site.length} site(s)
+                  </div>
+                </div>
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(brand)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  {brand.deletedAt ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleRestore(brand.id, brand.name)}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDelete(brand.id, brand.name)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -12,13 +12,13 @@ datasource db {
 // ============================================================
 
 model User {
-  id                                     String                @id
+  id                                     String                @id @default(cuid())
   name                                   String
   email                                  String                @unique
   emailVerified                          Boolean               @default(false)
   image                                  String?
   createdAt                              DateTime              @default(now())
-  updatedAt                              DateTime
+  updatedAt                              DateTime              @updatedAt
   deletedAt                              DateTime?
   
   // Relations
@@ -47,7 +47,7 @@ model User {
 }
 
 model Account {
-  id                    String    @id
+  id                    String    @id @default(cuid())
   accountId             String
   providerId            String
   userId                String
@@ -59,7 +59,7 @@ model Account {
   scope                 String?
   password              String?
   createdAt             DateTime  @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime @updatedAt
   User                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, accountId])
@@ -67,7 +67,7 @@ model Account {
 }
 
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
   expiresAt DateTime
   token     String   @unique
   createdAt DateTime @default(now())
@@ -82,18 +82,18 @@ model Session {
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime @updatedAt
 
   @@index([identifier])
 }
 
 model Role {
-  id         String       @id
+  id         String       @id @default(cuid())
   name       String       @unique
   Permission Permission[]
   UserRole   UserRole[]
@@ -109,7 +109,7 @@ model UserRole {// table de liaison
 }
 
 model Permission {
-  id               String             @id
+  id               String             @id @default(cuid())
   module           String
   roleId           String
   Role             Role               @relation(fields: [roleId], references: [id], onDelete: Cascade)
@@ -117,7 +117,7 @@ model Permission {
 }
 
 model PermissionAction {
-  id           String     @id
+  id           String     @id @default(cuid())
   value        String
   permissionId String
   Permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
@@ -130,7 +130,7 @@ model PermissionAction {
 // ============================================================
 
 model Profil {
-  id                String              @id
+  id                String              @id @default(cuid())
   bio               String              @default("")
   preferredLanguage String              @default("FR")
   userId            String              @unique
@@ -145,7 +145,7 @@ model Profil {
 }
 
 model ProfilAllergy {
-  id       String @id
+  id       String @id @default(cuid())
   value    String
   profilId String
   Profil   Profil @relation(fields: [profilId], references: [id], onDelete: Cascade)
@@ -154,7 +154,7 @@ model ProfilAllergy {
 }
 
 model ProfilDietaryPref {
-  id       String @id
+  id       String @id @default(cuid())
   value    String
   profilId String
   Profil   Profil @relation(fields: [profilId], references: [id], onDelete: Cascade)
@@ -163,7 +163,7 @@ model ProfilDietaryPref {
 }
 
 model Address {
-  id             String   @id
+  id             String   @id @default(cuid())
   typeAdress     String   @default("deliveryAddress")
   street         String
   city           String
@@ -182,7 +182,7 @@ model Address {
   isDefault      Boolean?
   instructions   String?
   createdAt      DateTime @default(now())
-  updatedAt      DateTime
+  updatedAt      DateTime @updatedAt
   userId         String?
   siteId         String?  @unique
   Site           Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
@@ -195,22 +195,22 @@ model Address {
 // ============================================================
 
 model LoyaltyAccount {
-  id                String              @id
+  id                String              @id @default(cuid())
   pointsBalance     Int                 @default(0)
   level             String              @default("BRONZE")
   createdAt         DateTime            @default(now())
-  updatedAt         DateTime
+  updatedAt         DateTime            @updatedAt
   userId            String              @unique
   User              User                @relation(fields: [userId], references: [id])
   PointsTransaction PointsTransaction[]
 }
 
 model PointsTransaction {
-  id             String         @id
+  id             String         @id @default(cuid())
   amount         Int
   reason         String
   orderId        String?
-  deletedAt      DateTime?
+  deletedAt      DateTime?      
   createdAt      DateTime       @default(now())
   accountId      String
   LoyaltyAccount LoyaltyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
@@ -219,7 +219,7 @@ model PointsTransaction {
 }
 
 model LoyaltyProgramConfig {
-  id                      String          @id
+  id                      String          @id @default(cuid())
   pointsPerEuro           Float
   levelThresholdsBronze   Int
   levelThresholdsSilver   Int
@@ -231,7 +231,7 @@ model LoyaltyProgramConfig {
 }
 
 model LoyaltyReward {
-  id                   String               @id
+  id                   String               @id @default(cuid())
   level                String
   description          String
   configId             String
@@ -245,7 +245,7 @@ model LoyaltyReward {
 // ============================================================
 
 model Brand {
-  id                   String                 @id
+  id                   String                 @id @default(cuid())
   slug                 String                 @unique
   name                 String
   description          String
@@ -253,7 +253,7 @@ model Brand {
   website              String?
   deletedAt            DateTime?
   createdAt            DateTime               @default(now())
-  updatedAt            DateTime
+  updatedAt            DateTime               @updatedAt
   BrandType            BrandType[]
   Faq                  FaqBrand[]
   FinancialReport      FinancialReport[]
@@ -266,7 +266,7 @@ model Brand {
 }
 
 model BrandType {
-  id      String @id
+  id      String @id @default(cuid())
   value   String
   brandId String
   Brand   Brand  @relation(fields: [brandId], references: [id], onDelete: Cascade)
@@ -275,14 +275,14 @@ model BrandType {
 }
 
 model Site {
-  id           String         @id
+  id           String         @id @default(cuid())
   name         String
   phone        String?
   email        String?
   isOpen       Boolean        @default(true)
   deletedAt    DateTime?
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime       @updatedAt
   brandId      String
   Address      Address?
   Cart         Cart[]
@@ -309,9 +309,10 @@ model OpeningHours {
 // ============================================================
 
 model Product {
-  id              String            @id
+  id              String            @id @default(cuid())
   orderdisplay    Int               @default(0)
   name            String
+  slug            String
   isMenu          Boolean           @default(false)
   description     String?
   price           Float
@@ -319,7 +320,7 @@ model Product {
   nutriScore      String?
   deletedAt       DateTime?
   createdAt       DateTime          @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime          @updatedAt
   brandId         String
   Brand           Brand             @relation(fields: [brandId], references: [id])
   CartItem        CartItem[]
@@ -342,7 +343,7 @@ model Product {
 // L'ENTITÉ : Les catégories de produits
 // ==========================================
 model CategoryProduct {
-  id           String @id
+  id           String @id @default(cuid())
   name         String // "Entrées", "Plats", "Desserts"
   categoryType String // "FOOD", "DRINK", "MENU"
   orderdisplay Int    @default(0)
@@ -370,7 +371,7 @@ model CategoryAssignmentProduct {
 }
 
 model ProductAllergen {
-  id        String  @id
+  id        String  @id @default(cuid())
   value     String
   productId String
   Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -379,7 +380,7 @@ model ProductAllergen {
 }
 
 model ProductScore {
-  id        String  @id
+  id        String  @id @default(cuid())
   type      String
   score     Float
   productId String
@@ -389,7 +390,7 @@ model ProductScore {
 }
 
 model ProductStock {
-  id                String  @id
+  id                String  @id @default(cuid())
   quantityAvailable Int     @default(0)
   threshold         Int     @default(10)
   productId         String
@@ -401,7 +402,7 @@ model ProductStock {
 }
 
 model NutritionalInfo {
-  id            String  @id
+  id            String  @id @default(cuid())
   calories      Float
   proteins      Float
   carbohydrates Float
@@ -415,7 +416,7 @@ model NutritionalInfo {
 // ----- OPTIONS & GROUPES -----
 
 model OptionGroup {
-  id           String   @id
+  id           String   @id @default(cuid())
   name         String
   type         String   @default("OPTIONAL")
   minSelection Int      @default(0)
@@ -428,7 +429,7 @@ model OptionGroup {
 }
 
 model Option {
-  id             String           @id
+  id             String           @id @default(cuid())
   name           String
   extraPrice     Float            @default(0)
   isDefault      Boolean          @default(false)
@@ -440,7 +441,7 @@ model Option {
 }
 
 model OptionAllergen {
-  id       String @id
+  id       String @id @default(cuid())
   value    String
   optionId String
   Option   Option @relation(fields: [optionId], references: [id], onDelete: Cascade)
@@ -451,7 +452,7 @@ model OptionAllergen {
 // ----- MENUS -----
 
 model Menu {
-  id          String        @id
+  id          String        @id @default(cuid())
   title       String
   productId   String        @unique
   Product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -459,7 +460,7 @@ model Menu {
 }
 
 model MenuSection {
-  id              String            @id
+  id              String            @id @default(cuid())
   name            String
   minSelection    Int               @default(0)
   maxSelection    Int               @default(1)
@@ -471,7 +472,7 @@ model MenuSection {
 }
 
 model MenuSectionItem {
-  id            String      @id
+  id            String      @id @default(cuid())
   menuSectionId String
   productId     String
   Product       Product     @relation(fields: [productId], references: [id])
@@ -483,7 +484,7 @@ model MenuSectionItem {
 // ----- RECETTES -----
 
 model Recipe {
-  id              String       @id
+  id              String       @id @default(cuid())
   name            String
   description     String?
   difficulty      String       @default("medium")
@@ -491,7 +492,7 @@ model Recipe {
   cookingTime     Int
   totalTime       Int
   createdAt       DateTime     @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime      @updatedAt
   productId       String       @unique
   Ingredient      Ingredient[]
   Product         Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -499,11 +500,11 @@ model Recipe {
 }
 
 model Ingredient {
-  id        String   @id
+  id        String   @id @default(cuid())
   name      String
   quantity  String
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   recipeId  String
   Recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
@@ -511,7 +512,7 @@ model Ingredient {
 }
 
 model Step {
-  id          String @id
+  id          String @id @default(cuid())
   order       Int
   description String
   recipeId    String
@@ -525,7 +526,7 @@ model Step {
 // ============================================================
 
 model Cart {
-  id            String     @id
+  id            String     @id @default(cuid())
   sessionId     String
   promotionCode String?
   subtotal      Float      @default(0)
@@ -534,7 +535,7 @@ model Cart {
   totalAmount   Float      @default(0)
   expiresAt     DateTime
   createdAt     DateTime   @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime   @updatedAt
   userId        String?
   siteId        String
   brandId       String
@@ -544,7 +545,7 @@ model Cart {
 }
 
 model CartItem {
-  id             String           @id
+  id             String           @id @default(cuid())
   quantity       Int
   cartId         String
   productId      String
@@ -556,7 +557,7 @@ model CartItem {
 }
 
 model CartItemOption {
-  id              String   @id
+  id              String   @id @default(cuid())
   optionGroupId   String
   optionGroupName String
   optionId        String
@@ -571,7 +572,7 @@ model CartItemOption {
 // ----- COMMANDES -----
 
 model Order {
-  id                    String          @id
+  id                    String          @id @default(cuid())
   number                String          @unique
   status                String          @default("CREATED")
   isScheduled           Boolean         @default(false)
@@ -587,7 +588,7 @@ model Order {
   specialInstructions   String?
   deletedAt             DateTime?
   createdAt             DateTime        @default(now())
-  updatedAt             DateTime
+  updatedAt             DateTime        @updatedAt
   userId                String
   siteId                String
   brandId               String
@@ -602,12 +603,14 @@ model Order {
 }
 
 model OrderItem {
-  id                   String            @id
+  id                   String            @id @default(cuid())
   quantity             Int
   unitPrice            Float
   productSnapshotName  String
   productSnapshotPrice Float
   specialInstructions  String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
   deletedAt            DateTime?
   orderId              String
   productId            String
@@ -619,7 +622,7 @@ model OrderItem {
 }
 
 model OrderItemOption {
-  id              String    @id
+  id              String    @id @default(cuid())
   optionGroupId   String
   optionGroupName String
   optionId        String
@@ -637,13 +640,14 @@ model OrderItemOption {
 // ============================================================
 
 model Driver {
-  id               String             @id
+  id               String             @id @default(cuid())
   status           String             @default("OFFLINE")
   currentLat       Float?
   currentLng       Float?
   rating           Float              @default(0)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
   userId           String             @unique
   User             User               @relation(fields: [userId], references: [id])
   AvailabilitySlot AvailabilitySlot[]
@@ -652,7 +656,7 @@ model Driver {
 }
 
 model AvailabilitySlot {
-  id        String @id
+  id        String @id @default(cuid())
   dayOfWeek Int
   startTime String
   endTime   String
@@ -663,7 +667,7 @@ model AvailabilitySlot {
 }
 
 model Delivery {
-  id                  String       @id
+  id                  String       @id @default(cuid())
   status              String       @default("ACCEPTED")
   pickupEstimatedAt   DateTime?
   deliveryEstimatedAt DateTime?
@@ -673,9 +677,9 @@ model Delivery {
   deliveryPhoto       String?
   driverComent        String?
   deletedAt           DateTime?
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime
-  orderId             String       @unique
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+ orderId             String       @unique
   driverId            String
   Driver              Driver       @relation(fields: [driverId], references: [id])
   Order               Order        @relation(fields: [orderId], references: [id])
@@ -683,7 +687,7 @@ model Delivery {
 }
 
 model TrackPoint {
-  id         String   @id
+  id         String   @id @default(cuid())
   lat        Float
   lng        Float
   timestamp  DateTime @default(now())
@@ -694,7 +698,7 @@ model TrackPoint {
 }
 
 model DeliveryZone {
-  id                       String              @id
+  id                       String              @id @default(cuid())
   name                     String
   deliveryFee              Float               @default(0)
   estimatedDeliveryMinutes Int                 @default(30)
@@ -708,7 +712,7 @@ model DeliveryZone {
 }
 
 model DeliveryZonePoint {
-  id           String       @id
+  id           String       @id @default(cuid())
   lat          Float
   lng          Float
   order        Int
@@ -723,7 +727,7 @@ model DeliveryZonePoint {
 // ============================================================
 
 model Payment {
-  id              String    @id
+  id              String    @id @default(cuid())
   amount          Float
   currency        String    @default("EUR")
   method          String
@@ -750,7 +754,7 @@ model PaymentMethod {
 }
 
 model Refund {
-  id          String    @id
+  id          String    @id @default(cuid())
   amount      Float
   currency    String    @default("EUR")
   reason      String
@@ -770,7 +774,7 @@ model Refund {
 // ============================================================
 
 model Promotion {
-  id            String          @id
+  id            String          @id @default(cuid())
   code          String          @unique
   type          String
   value         Float
@@ -786,7 +790,7 @@ model Promotion {
 }
 
 model PromotionSite {
-  id          String    @id
+  id          String    @id @default(cuid())
   promotionId String
   siteId      String
   Promotion   Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
@@ -799,7 +803,7 @@ model PromotionSite {
 // ============================================================
 
 model FraudAlert {
-  id            String   @id
+  id            String   @id @default(cuid())
   ruleTriggered String
   severity      String   @default("LOW")
   status        String   @default("OPEN")
@@ -814,15 +818,15 @@ model FraudAlert {
 // ============================================================
 
 model Review {
-  id              String            @id
+  id              String            @id @default(cuid())
   targetType      String
   targetId        String
   globalRating    Float
   comment         String?
   photoUrl        String?
   isAnonymous     Boolean           @default(false)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime
+    createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   authorId        String
   User            User              @relation(fields: [authorId], references: [id])
   RatingCriterion RatingCriterion[]
@@ -830,7 +834,7 @@ model Review {
 }
 
 model RatingCriterion {
-  id       String @id
+  id       String @id @default(cuid())
   name     String
   score    Float
   reviewId String
@@ -840,7 +844,7 @@ model RatingCriterion {
 }
 
 model ReviewFlag {
-  id         String   @id
+  id         String   @id @default(cuid())
   reason     String
   status     String   @default("PENDING")
   createdAt  DateTime @default(now())
@@ -855,7 +859,7 @@ model ReviewFlag {
 // ============================================================
 
 model QualityProgram {
-  id                   String                 @id
+  id                   String                 @id @default(cuid())
   name                 String
   badgeIconUrl         String
   startDate            DateTime
@@ -866,7 +870,7 @@ model QualityProgram {
 }
 
 model QualityCriterion {
-  id             String         @id
+  id             String         @id @default(cuid())
   metric         String
   threshold      Float
   programId      String
@@ -876,7 +880,7 @@ model QualityCriterion {
 }
 
 model QualityProgramWinner {
-  id             String         @id
+  id             String         @id @default(cuid())
   programId      String
   brandId        String
   Brand          Brand          @relation(fields: [brandId], references: [id])
@@ -898,8 +902,9 @@ model BlogPost {
   imageUrl    String?
   published   Boolean       @default(false)
   publishedAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime
+    createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   authorId    String
   User        User          @relation(fields: [authorId], references: [id])
   BlogPostTag BlogPostTag[]
@@ -915,7 +920,7 @@ model BlogPostTag {
 }
 
 model Gallery {
-  id           String         @id
+  id           String         @id@default(cuid())
   name         String
   altText      String
   description  String?
@@ -932,7 +937,7 @@ model Gallery {
 }
 
 model GalleryImage {
-  id        String  @id
+  id        String  @id @default(cuid())
   url       String
   galleryId String
   Gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
@@ -945,7 +950,7 @@ model GalleryImage {
 // ============================================================
 
 model GlobalAnnouncement {
-  id                  String                @id
+  id                  String                @id @default(cuid())
   title               String
   message             String
   importance          String                @default("INFO")
@@ -957,7 +962,7 @@ model GlobalAnnouncement {
 }
 
 model AnnouncementChannel {
-  id                 String             @id
+  id                 String             @id @default(cuid())
   value              String
   announcementId     String
   GlobalAnnouncement GlobalAnnouncement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
@@ -966,7 +971,7 @@ model AnnouncementChannel {
 }
 
 model Notification {
-  id        String   @id
+  id        String   @id @default(cuid())
   type      String
   title     String
   body      String
@@ -981,7 +986,7 @@ model Notification {
 // ============================================================
 
 model SupportTicket {
-  id          String        @id
+  id          String        @id @default(cuid())
   subject     String
   status      String        @default("OPEN")
   priority    String        @default("NORMAL")
@@ -996,7 +1001,7 @@ model SupportTicket {
 }
 
 model ChatMessage {
-  id            String        @id
+  id            String        @id @default(cuid())
   message       String
   attachmentUrl String?
   deletedAt     DateTime?
@@ -1014,7 +1019,7 @@ model ChatMessage {
 // ============================================================
 
 model Referral {
-  id                                 String   @id
+  id                                 String   @id @default(cuid())
   code                               String   @unique
   status                             String   @default("SENT")
   rewardGranted                      Boolean  @default(false)
@@ -1030,7 +1035,7 @@ model Referral {
 // ============================================================
 
 model Favorite {
-  id         String   @id
+  id         String   @id @default(cuid())
   targetType String
   targetId   String
   createdAt  DateTime @default(now())
@@ -1043,7 +1048,7 @@ model Favorite {
 // ============================================================
 
 model Survey {
-  id                  String                @id
+  id                  String                @id @default(cuid())
   title               String
   description         String?
   isActive            Boolean               @default(false)
@@ -1053,7 +1058,7 @@ model Survey {
 }
 
 model SurveyQuestion {
-  id                   String                 @id
+  id                   String                 @id @default(cuid())
   type                 String
   text                 String
   required             Boolean                @default(false)
@@ -1065,7 +1070,7 @@ model SurveyQuestion {
 }
 
 model SurveyQuestionOption {
-  id             String         @id
+  id             String         @id @default(cuid())
   value          String
   questionId     String
   SurveyQuestion SurveyQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -1087,7 +1092,7 @@ model SurveyTargetSegment {
 // ============================================================
 
 model UserVoiceSuggestion {
-  id               String             @id
+  id               String             @id @default(cuid())
   title            String
   description      String
   category         String
@@ -1103,7 +1108,7 @@ model UserVoiceSuggestion {
 }
 
 model UserVoiceComment {
-  id                  String              @id
+  id                  String              @id @default(cuid())
   content             String
   createdAt           DateTime            @default(now())
   suggestionId        String
@@ -1115,7 +1120,7 @@ model UserVoiceComment {
 }
 
 model RoadmapItem {
-  id                  String                @id
+  id                  String                @id @default(cuid())
   title               String
   description         String
   quarter             String
@@ -1129,7 +1134,7 @@ model RoadmapItem {
 // ============================================================
 
 model FinancialReport {
-  id                   String                 @id
+  id                   String                 @id @default(cuid())
   periodStart          DateTime
   periodEnd            DateTime
   grossRevenue         Float
@@ -1143,7 +1148,7 @@ model FinancialReport {
 }
 
 model FinancialTransaction {
-  id              String          @id
+  id              String          @id @default(cuid())
   orderId         String
   date            DateTime
   grossAmount     Float
@@ -1158,7 +1163,7 @@ model FinancialTransaction {
 }
 
 model Payout {
-  id             String    @id
+  id             String    @id @default(cuid())
   amount         Float
   currency       String    @default("EUR")
   periodStart    DateTime
@@ -1166,7 +1171,9 @@ model Payout {
   status         String    @default("PENDING")
   settlementDate DateTime?
   invoiceUrl     String?
-  createdAt      DateTime  @default(now())
+    createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   brandId        String
   Brand          Brand     @relation(fields: [brandId], references: [id])
 }
@@ -1176,7 +1183,7 @@ model Payout {
 // ============================================================
 
 model TaxRule {
-  id           String  @id
+id         String   @id @default(cuid())
   name         String
   rate         Float
   countryCode  String
@@ -1189,7 +1196,7 @@ model TaxRule {
 // ============================================================
 
 model FaqBrand {
-  id       String @id
+id         String   @id @default(cuid())
   useBy    String
   question String
   answer   String
@@ -1204,7 +1211,7 @@ model FaqBrand {
 // ============================================================
 
 model KycDocument {
-  id         String   @id
+  id         String   @id @default(cuid())
   type       String
   fileUrl    String
   status     String   @default("PENDING")

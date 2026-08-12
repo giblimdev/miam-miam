@@ -1,4 +1,4 @@
-//@ /store/useBrandStore.ts
+//@ /stores/useBrandStore.ts
 /*
  role : Store Zustand global pour la marque actuellement sélectionnée.
         Permet à SiteManager (et d'autres modules) de savoir sur quelle marque

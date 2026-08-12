@@ -16,6 +16,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { toast } from 'sonner';
 import type { CreateSiteInput, UpdateSiteInput } from '@/lib/validations/site';
+import { randomUUID } from 'crypto';
 
 /**
  * Récupère tous les sites d'une marque donnée.
@@ -41,7 +42,13 @@ export async function getSitesByBrand(brandId: string) {
  */
 export async function createSite(data: CreateSiteInput) {
   try {
-    const site = await prisma.site.create({ data });
+    const site = await prisma.site.create({
+      data: {
+        id: randomUUID(),
+        updatedAt: new Date(),
+        ...data,
+      },
+    });
     revalidatePath('/admin/siteManager');
     toast.success(`Site "${site.name}" créé avec succès !`);
     return site;
@@ -57,7 +64,13 @@ export async function createSite(data: CreateSiteInput) {
  */
 export async function updateSite(id: string, data: UpdateSiteInput) {
   try {
-    const site = await prisma.site.update({ where: { id }, data });
+    const site = await prisma.site.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+      },
+    });
     revalidatePath('/admin/siteManager');
     toast.success(`Site "${site.name}" mis à jour avec succès !`);
     return site;
@@ -75,14 +88,35 @@ export async function deleteSite(id: string) {
   try {
     const site = await prisma.site.update({
       where: { id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date(), updatedAt: new Date() },
       select: { name: true },
     });
     revalidatePath('/admin/siteManager');
     toast.success(`Site "${site.name}" supprimé avec succès !`);
+    return site;
   } catch (error) {
     console.error(`Erreur lors de la suppression du site ${id} :`, error);
     toast.error('Erreur lors de la suppression du site');
+    throw error;
+  }
+}
+
+/**
+ * Restaure un site supprimé.
+ */
+export async function restoreSite(id: string) {
+  try {
+    const site = await prisma.site.update({
+      where: { id },
+      data: { deletedAt: null, updatedAt: new Date() },
+      select: { name: true },
+    });
+    revalidatePath('/admin/siteManager');
+    toast.success(`Site "${site.name}" restauré avec succès !`);
+    return site;
+  } catch (error) {
+    console.error(`Erreur lors de la restauration du site ${id} :`, error);
+    toast.error('Erreur lors de la restauration du site');
     throw error;
   }
 }

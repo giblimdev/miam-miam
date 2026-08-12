@@ -16,6 +16,17 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { toast } from 'sonner';
 import type { CreateProductInput, UpdateProductInput } from '@/lib/validations/product';
+import { randomUUID } from 'crypto';
+
+// Fonction utilitaire pour générer un slug unique
+function generateSlug(name: string): string {
+  const baseSlug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  const suffix = randomUUID().slice(0, 6);
+  return `${baseSlug}-${suffix}`;
+}
 
 /**
  * Récupère tous les produits d'une marque donnée.
@@ -38,7 +49,16 @@ export async function getProductsByBrand(brandId: string) {
  */
 export async function createProduct(data: CreateProductInput) {
   try {
-    const product = await prisma.product.create({ data });
+    const slug = generateSlug(data.name);
+
+    const product = await prisma.product.create({
+      data: {
+        id: randomUUID(),
+        updatedAt: new Date(),
+        slug,
+        ...data,
+      },
+    });
     revalidatePath('/admin/productManager');
     toast.success(`Produit "${product.name}" créé avec succès !`);
     return product;
@@ -54,7 +74,16 @@ export async function createProduct(data: CreateProductInput) {
  */
 export async function updateProduct(id: string, data: UpdateProductInput) {
   try {
-    const product = await prisma.product.update({ where: { id }, data });
+    const slug = data.name ? generateSlug(data.name) : undefined;
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        ...data,
+        updatedAt: new Date(),
+        ...(slug && { slug }),
+      },
+    });
     revalidatePath('/admin/productManager');
     toast.success(`Produit "${product.name}" mis à jour avec succès !`);
     return product;
@@ -72,7 +101,7 @@ export async function deleteProduct(id: string) {
   try {
     const product = await prisma.product.update({
       where: { id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date(), updatedAt: new Date() },
       select: { name: true },
     });
     revalidatePath('/admin/productManager');

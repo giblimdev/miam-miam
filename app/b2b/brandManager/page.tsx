@@ -1,33 +1,42 @@
-//@ /app/b2b/brandManager/BrandManager.tsx
-/*
- role : Composant de gestion des marques pour l'espace B2B.
-        Permet de gérer les marques, leurs sites et produits.
- import:
-   - React : useState, useEffect, useCallback
-   - shadcn/ui : Button, Card, Table...
-   - lucide-react : Plus, Pencil, Trash2...
-   - @/actions/brandManager : getBrands, createBrand, updateBrand, deleteBrand
-   - @/hooks/useBrandForm : hook de gestion du formulaire
-   - @/lib/generated/prisma/client : type Brand
- useBy : app/b2b/brandManager/page.tsx
-*/
-
+// app/b2b/brandManager/page.tsx
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { getBrands, createBrand, updateBrand, deleteBrand } from '@/actions/brandManager';
-import { useBrandForm } from '@/hooks/useBrandForm';
-import type { Brand } from '@/lib/generated/prisma/client';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import BrandManager from './BrandManager';
+import SiteManager from './SiteManager';
+import ProductManager from './ProductManager';
+import { useBrandStore } from '@/stores/useBrandStore';
 
-// ... reste du code ...
+export default function BrandManagerPage() {
+  const selectedBrandId = useBrandStore((state) => state.selectedBrandId);
 
-// ✅ Fonction exportée par défaut
-export default function BrandManager() {
-  // ... code du composant ...
+  return (
+    <div className="container mx-auto py-6 space-y-6">
+      <h1 className="text-3xl font-bold">Gestion B2B</h1>
+
+      <Tabs defaultValue="brands" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="brands">Marques</TabsTrigger>
+          <TabsTrigger value="sites" disabled={!selectedBrandId}>
+            Sites
+          </TabsTrigger>
+          <TabsTrigger value="products" disabled={!selectedBrandId}>
+            Produits
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="brands">
+          <BrandManager />
+        </TabsContent>
+
+        <TabsContent value="sites">
+          <SiteManager />
+        </TabsContent>
+
+        <TabsContent value="products">
+          <ProductManager />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }
-
-// ❌ NE PAS UTILISER ce type d'export si vous voulez un export par défaut
-// export { BrandManager };
