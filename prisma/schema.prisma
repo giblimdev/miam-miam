@@ -28,7 +28,6 @@ model User {
   Cart                                   Cart[]
   Driver                                 Driver?
   Favorite                               Favorite[]
-  Gallery                                Gallery[]
   KycDocument                            KycDocument[]
   LoyaltyAccount                         LoyaltyAccount?
   Notification                           Notification[]
@@ -71,7 +70,7 @@ model Session {
   expiresAt DateTime
   token     String   @unique
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
@@ -138,6 +137,9 @@ model Profil {
   notifPush         Boolean             @default(true)
   notifEmail        Boolean             @default(true)
   notifSms          Boolean             @default(false)
+  deletedAt            DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
   User              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   ProfilAllergy     ProfilAllergy[]
   ProfilDietaryPref ProfilDietaryPref[]
@@ -181,8 +183,9 @@ model Address {
   label          String?
   isDefault      Boolean?
   instructions   String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  deletedAt            DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
   userId         String?
   siteId         String?  @unique
   Site           Site?    @relation(fields: [siteId], references: [id], onDelete: Cascade)
@@ -200,6 +203,7 @@ model LoyaltyAccount {
   level             String              @default("BRONZE")
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
+  deletedAt                              DateTime?
   userId            String              @unique
   User              User                @relation(fields: [userId], references: [id])
   PointsTransaction PointsTransaction[]
@@ -257,7 +261,6 @@ model Brand {
   BrandType            BrandType[]
   Faq                  FaqBrand[]
   FinancialReport      FinancialReport[]
-  Gallery              Gallery[]
   Payout               Payout[]
   Product              Product[]
   Promotion            Promotion[]
@@ -294,7 +297,7 @@ model Site {
 }
 
 model OpeningHours {
-  id        String @id
+  id        String @id @default(cuid())
   dayOfWeek Int
   openTime  String
   closeTime String
@@ -330,7 +333,6 @@ model Product {
 
   // Relations existantes
   CartItem        CartItem[]
-  Gallery         Gallery?
   Menu            Menu?
   MenuSectionItem MenuSectionItem[]
   NutritionalInfo NutritionalInfo?
@@ -346,6 +348,11 @@ model Product {
 
   // Spécifications produit (table dédiée)
   productSpecs ProductSpec[]
+
+productRelations        ProductRelation[] @relation("ProductRelations")
+relatedProductRelations ProductRelation[] @relation("RelatedProducts")
+
+
 }
 
 // ==========================================
@@ -499,6 +506,23 @@ model MenuSectionItem {
 
   @@index([menuSectionId])
 }
+model ProductRelation {
+  id               String   @id @default(cuid())
+  productId        String   // ID du produit source
+  relatedProductId String   // ID du produit cible
+  type             String   // Type de relation ("UPSELL", "CROSSSELL", "ACCESSORY", "ALTERNATIVE")
+  orderdisplay     Int      @default(0) // Ordre d'affichage dans la liste des recommandations
+  createdAt        DateTime @default(now())
+
+  // Relations
+  product          Product  @relation("ProductRelations", fields: [productId], references: [id], onDelete: Cascade)
+  relatedProduct   Product  @relation("RelatedProducts", fields: [relatedProductId], references: [id], onDelete: Cascade)
+
+  // Index et contraintes
+  @@index([productId])
+  @@index([relatedProductId])
+  @@unique([productId, relatedProductId, type])
+}
 
 model ProductStock {
   id                String  @id @default(cuid())
@@ -613,6 +637,7 @@ model Order {
   serviceFee            Float           @default(0)
   totalAmount           Float
   currency              String          @default("EUR")
+  shippingAddressId     String?         //enregistre l'adress de livraison.
   estimatedDeliveryTime DateTime?
   cancellationDeadline  DateTime?
   cancellationReason    String?
@@ -773,7 +798,7 @@ model Payment {
 }
 
 model PaymentMethod {
-  id             String   @id
+  id             String   @id @default(cuid())
   type           String
   lastFourDigits String?
   expiryDate     String?
@@ -925,7 +950,7 @@ model QualityProgramWinner {
 // ============================================================
 
 model BlogPost {
-  id          String        @id
+  id          String        @id @default(cuid())
   title       String
   content     String
   excerpt     String?
@@ -934,6 +959,7 @@ model BlogPost {
   published   Boolean       @default(false)
   publishedAt DateTime?
     createdAt DateTime @default(now())
+    deletedAt                              DateTime?
   updatedAt DateTime @updatedAt
 
   authorId    String
@@ -942,7 +968,7 @@ model BlogPost {
 }
 
 model BlogPostTag {
-  id         String   @id
+  id         String   @id @default(cuid())
   value      String
   blogPostId String
   BlogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
@@ -951,20 +977,21 @@ model BlogPostTag {
 }
 
 model Gallery {
-  id           String         @id@default(cuid())
+  id           String         @id @default(cuid())
   name         String
   altText      String
   description  String?
   mainImage    String
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime
-  brandId      String?
-  productId    String         @unique
-  ownerId      String
-  User         User           @relation(fields: [ownerId], references: [id])
-  Product      Product        @relation(fields: [productId], references: [id])
-  Brand        Brand?         @relation(fields: [brandId], references: [id])
+  updatedAt    DateTime       @updatedAt
+  targetType  GalleryTargetType // enum : PRODUCT, BRAND, CATEGORY, SITE...
+  targetId    String
   GalleryImage GalleryImage[]
+}
+enum GalleryTargetType {
+  PRODUCT
+  BRAND
+  CATEGORY
 }
 
 model GalleryImage {
@@ -1007,6 +1034,7 @@ model Notification {
   title     String
   body      String
   isRead    Boolean  @default(false)
+  updateAt  DateTime     @updatedAt
   createdAt DateTime @default(now())
   userId    String
   User      User     @relation(fields: [userId], references: [id])
@@ -1023,7 +1051,7 @@ model SupportTicket {
   priority    String        @default("NORMAL")
   deletedAt   DateTime?
   createdAt   DateTime      @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime     @updatedAt
   userId      String
   orderId     String?
   User        User          @relation(fields: [userId], references: [id])
@@ -1110,7 +1138,7 @@ model SurveyQuestionOption {
 }
 
 model SurveyTargetSegment {
-  id       String @id
+  id       String   @id @default(cuid())
   value    String
   surveyId String
   Survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
@@ -1130,7 +1158,7 @@ model UserVoiceSuggestion {
   status           String             @default("SOUMISE")
   votes            Int                @default(0)
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime           @updatedAt
   authorId         String
   roadmapItemId    String?
   User             User               @relation(fields: [authorId], references: [id])
@@ -1156,7 +1184,7 @@ model RoadmapItem {
   description         String
   quarter             String
   status              String                @default("EN_REFLEXION")
-  updatedAt           DateTime
+  updatedAt           DateTime              @updatedAt
   UserVoiceSuggestion UserVoiceSuggestion[]
 }
 
@@ -1202,8 +1230,8 @@ model Payout {
   status         String    @default("PENDING")
   settlementDate DateTime?
   invoiceUrl     String?
-    createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    createdAt DateTime     @default(now())
+  updatedAt DateTime       @updatedAt
 
   brandId        String
   Brand          Brand     @relation(fields: [brandId], references: [id])
@@ -1225,7 +1253,7 @@ id         String   @id @default(cuid())
 // ============================================================
 // 22. FAQ
 // ============================================================
-
+// a renimer et modifier comme gallery
 model FaqBrand {
 id         String   @id @default(cuid())
   useBy    String

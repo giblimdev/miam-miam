@@ -253,3 +253,4 @@ export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }:
     </Dialog>
   );
 }
+/*nutricare deviens silencieux ici une simple valeur par defaut est passé "NC" */
