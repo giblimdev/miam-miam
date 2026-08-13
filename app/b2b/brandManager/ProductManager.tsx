@@ -2,11 +2,11 @@
 /*
  Rôle : CRUD des produits de la marque sélectionnée dans @/stores/useBrandStore.
         Fournit l'interface d'ajout/édition via ProductForm, affiche la liste via ProductDisplay,
-        et propose un bouton pour ouvrir un outil avancé (ProductTool) dans un modal.
+        et propose un lien direct vers l'outil avancé (ProductTool).
  Importe :
    - React : useState, useEffect, useCallback
    - next/navigation : useRouter
-   - shadcn/ui : Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription
+   - shadcn/ui : Button
    - lucide-react : Plus, ArrowLeft, Wrench
    - sonner : toast
    - @/actions/productManager : getProductsByBrand, deleteProduct
@@ -14,14 +14,15 @@
    - ./ProductForm : ProductForm (formulaire création/édition)
    - @/stores/useBrandStore : store Zustand pour la marque sélectionnée
    - @/lib/generated/prisma/client : type Product
+   - next/link : Link
  Utilisé par : app/admin/brandManager/page.tsx
 */
 /*
  ARCHITECTURE & FLUX DE DONNÉES :
- - En-tête : bouton retour, titre avec nom de marque, bouton "Outil produit", bouton "Nouveau produit".
+ - En-tête : bouton retour, titre avec nom de marque, lien "Outil produit", bouton "Nouveau produit".
  - ProductForm : dialog modale pour créer/éditer un produit.
  - ProductDisplay : tableau de produits avec recherche, filtre, actions et zone JSON.
- - ProductTool : modal avec composant placeholder (en construction).
+ - ProductTool : lien direct vers /b2b/productTools.
  - Client Component pour l'état local (selectedBrandId, produits, dialogs).
  - Server Actions pour les opérations CRUD.
  - Flux : selectedBrandId (store) → loadProducts() → products → ProductDisplay.
@@ -33,16 +34,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
 import { Plus, ArrowLeft, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getProductsByBrand, deleteProduct } from '@/actions/productManager';
 import { ProductForm } from './ProductForm ';
 import { ProductDisplay } from './ProductDisplay';
@@ -58,7 +53,6 @@ export default function ProductManager() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [toolOpen, setToolOpen] = useState(false); // ← État pour le modal ProductTool
 
   const loadProducts = useCallback(async () => {
     if (!selectedBrandId) {
@@ -160,15 +154,14 @@ export default function ProductManager() {
           </h2>
         </div>
         <div className="flex gap-2">
-          {/* Bouton pour ouvrir le modal ProductTool */}
-          <Button
-            variant="outline"
-            onClick={() => setToolOpen(true)}
-            className="border-blue-200 text-blue-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+          {/* Lien direct vers l'outil produit */}
+          <Link
+            href="/b2b/productTools"
+            className="inline-flex items-center justify-center rounded-md border border-blue-200 px-4 py-2 text-sm font-medium text-blue-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-colors"
           >
             <Wrench className="h-4 w-4 mr-2" />
             Outil produit
-          </Button>
+          </Link>
           <Button
             onClick={handleCreate}
             className="bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md hover:from-orange-600 hover:to-orange-700 hover:shadow-lg hover:shadow-orange-500/25 transition-all"
@@ -208,21 +201,6 @@ export default function ProductManager() {
           onDelete={handleDelete}
         />
       )}
-
-      {/* Modal ProductTool (placeholder) */}
-      <Dialog open={toolOpen} onOpenChange={setToolOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Outil produit avancé</DialogTitle>
-            <DialogDescription>
-              Ce module est en construction. Il permettra de gérer les spécifications, catégories et relations avancées des produits.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-            🛠️ ProductTool – bientôt disponible
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -11,8 +11,8 @@ import { useBrandStore } from '@/stores/useBrandStore';
 import type { Brand } from '@/lib/generated/prisma/client';
 
 type BrandWithRelations = Brand & {
-  BrandType: { value: string }[];
-  Site: { id: string; name: string }[];
+  brandTypes: { value: string }[];
+  sites: { id: string; name: string }[];
 };
 
 export default function BrandManager() {
@@ -58,7 +58,6 @@ export default function BrandManager() {
         await deleteBrand(id);
         toast.success(`Marque "${name}" supprimée`);
         await loadBrands();
-        // Si la marque supprimée était sélectionnée, on la désélectionne
         const store = useBrandStore.getState();
         if (store.selectedBrandId === id) {
           setSelectedBrand(null, null);
@@ -119,7 +118,7 @@ export default function BrandManager() {
               description: editingBrand.description,
               logo: editingBrand.logo || '',
               website: editingBrand.website || '',
-              type: editingBrand.BrandType.map(t => t.value),
+              type: editingBrand.brandTypes.map(t => t.value),
             } : undefined}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
@@ -143,10 +142,10 @@ export default function BrandManager() {
                 <div>
                   <div className="font-medium">{brand.name}</div>
                   <div className="text-sm text-muted-foreground">
-                    {brand.BrandType.map(t => t.value).join(', ')}
+                    {brand.brandTypes.map(t => t.value).join(', ')}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {brand.Site.length} site(s)
+                    {brand.sites.length} site(s)
                   </div>
                 </div>
                 <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>

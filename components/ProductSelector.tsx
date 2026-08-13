@@ -40,7 +40,6 @@ type ProductListItem = {
   isAvailable: boolean;
   isMenu: boolean;
   brand: { id: string; name: string } | null;
-  gallery: { images: { url: string }[] } | null;
 };
 
 interface ProductSelectorProps {
@@ -60,7 +59,8 @@ export function ProductSelector({ onSelect, trigger }: ProductSelectorProps) {
       setLoading(true);
       getProducts()
         .then((data) => {
-          setProducts(data as ProductListItem[]);
+          // La réponse est déjà conforme au type attendu (sans gallery)
+          setProducts(data);
         })
         .catch((error) => {
           console.error('Erreur chargement produits :', error);

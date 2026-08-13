@@ -1,4 +1,3 @@
-//@ /actions/brandManager.ts
 /*
  role : Server Actions pour la gestion des marques (CRUD).
         Toutes les interactions avec la base de données pour les marques.
@@ -23,10 +22,10 @@ export async function getBrands() {
     return await prisma.brand.findMany({
       where: { deletedAt: null },
       include: {
-        BrandType: {
+        brandTypes: {
           select: { value: true },
         },
-        Site: {
+        sites: {
           where: { deletedAt: null },
           select: { id: true, name: true },
         },
@@ -47,10 +46,10 @@ export async function getBrandById(id: string) {
     return await prisma.brand.findUnique({
       where: { id, deletedAt: null },
       include: {
-        BrandType: {
+        brandTypes: {
           select: { value: true },
         },
-        Site: {
+        sites: {
           where: { deletedAt: null },
           select: { id: true, name: true },
         },
@@ -72,15 +71,15 @@ export async function createBrand(data: CreateBrandInput) {
     const brand = await prisma.brand.create({
       data: {
         ...brandData,
-        BrandType: {
+        brandTypes: {
           create: type.map((value) => ({ value })),
         },
       },
       include: {
-        BrandType: {
+        brandTypes: {
           select: { value: true },
         },
-        Site: {
+        sites: {
           where: { deletedAt: null },
           select: { id: true, name: true },
         },
@@ -111,15 +110,15 @@ export async function updateBrand(id: string, data: UpdateBrandInput) {
       where: { id },
       data: {
         ...brandData,
-        BrandType: {
+        brandTypes: {
           create: type.map((value) => ({ value })),
         },
       },
       include: {
-        BrandType: {
+        brandTypes: {
           select: { value: true },
         },
-        Site: {
+        sites: {
           where: { deletedAt: null },
           select: { id: true, name: true },
         },

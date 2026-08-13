@@ -23,7 +23,7 @@ export async function getSitesByBrand(brandId: string) {
     return await prisma.site.findMany({
       where: { brandId, deletedAt: null },
       include: {
-        Address: true,
+        address: true,
       },
       orderBy: { name: 'asc' },
     });
