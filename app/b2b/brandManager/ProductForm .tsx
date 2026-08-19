@@ -1,85 +1,124 @@
-//@ /app/admin/brandManager/ProductForm.tsx
+// @/app/admin/brandManager/ProductForm.tsx
+
 /*
- Rôle : Formulaire de création/édition d'un produit, dans un Dialog.
-        Utilise react-hook-form + zod pour la validation.
- Importe :
-   - react-hook-form : useForm
-   - @hookform/resolvers/zod : zodResolver
-   - zod : z (schéma local, aligné sur createProductSchema/updateProductSchema)
-   - server actions : @/actions/productManager (createProduct, updateProduct)
-   - shadcn/ui : Dialog, Input, Label, Switch, Select, Textarea, Button
-   - @/lib/generated/prisma/client : type Product
- Utilisé par : app/admin/brandManager/ProductManager.tsx
-*/
-/*
- ARCHITECTURE & FLUX DE DONNÉES :
- - Schéma local `productFormSchema` : validation côté client.
- - useForm : gère l'état, la validation et les erreurs inline.
- - handleFormSubmit : appelle createProduct ou updateProduct selon le mode,
-   puis déclenche onSuccess et ferme le Dialog.
- - Mode création/édition déterminé par la prop `product`.
- - `reset()` appelé à chaque ouverture pour repartir des bonnes valeurs.
- - `price` en input number avec `valueAsNumber`, `nutriScore` en select A-E (optionnel).
- - Catégories et stock par site hors scope de ce formulaire.
+  Rôle :
+    Formulaire de création / édition d'un produit dans un Dialog.
+
+  Responsabilités :
+    - Nom
+    - Slug
+    - Description
+    - Prix
+    - Type de produit : menu / produit simple
+    - Disponibilité
+    - NutriScore silencieux avec valeur par défaut "NC"
+    - Ordre d'affichage
+
+  Architecture :
+    - Client Component
+    - react-hook-form
+    - zod
+    - server actions productManager
+    - shadcn/ui
+
+  NutriCare :
+    - Aucune gestion UI spécifique
+    - Aucune logique métier
+    - Valeur par défaut : "NC"
+    - Le champ n'est pas affiché dans le formulaire
+
+  Utilisé par :
+    - app/admin/brandManager/ProductManager.tsx
 */
 
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { createProduct, updateProduct } from '@/actions/productManager';
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+import { createProduct, updateProduct } from "@/actions/productManager";
+
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import type { Product } from '@/lib/generated/prisma/client';
+} from "@/components/ui/dialog";
 
-// ------------------------------------------------------------
-// Schéma local (sans brandId, injecté séparément)
-// ------------------------------------------------------------
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+
+import { Button } from "@/components/ui/button";
+
+import type { Product } from "@/lib/generated/prisma/client";
+
+// ============================================================
+// Schéma
+// ============================================================
 
 const productFormSchema = z.object({
-  name: z.string().min(1, 'Le nom est requis'),
+  name: z.string().trim().min(1, "Le nom est requis"),
+
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Le slug est requis")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Le slug doit contenir uniquement des lettres minuscules, chiffres et tirets",
+    ),
+
   description: z.string().optional(),
-  price: z.number().min(0, 'Le prix doit être positif ou nul'),
+
+  price: z.number().min(0, "Le prix doit être positif ou nul"),
+
   isMenu: z.boolean(),
+
   isAvailable: z.boolean(),
-  nutriScore: z.enum(['A', 'B', 'C', 'D', 'E', 'NONE']),
-  orderdisplay: z.number().int(),
+
+  /*
+    NutriCare est volontairement silencieux.
+
+    "NC" est transmis comme valeur par défaut.
+    Le champ n'est pas affiché dans l'interface.
+  */
+  nutriScore: z.enum(["A", "B", "C", "D", "E", "NC"]),
+
+  orderdisplay: z.number().int().min(0),
 });
+
+// ============================================================
+// Type du formulaire
+// ============================================================
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
+// ============================================================
+// Valeurs par défaut
+// ============================================================
+
 const EMPTY_VALUES: ProductFormValues = {
-  name: '',
-  description: '',
+  name: "",
+  slug: "",
+  description: "",
   price: 0,
   isMenu: false,
   isAvailable: true,
-  nutriScore: 'NONE',
+
+  // NutriCare silencieux
+  nutriScore: "NC",
+
   orderdisplay: 0,
 };
 
-// ------------------------------------------------------------
+// ============================================================
 // Props
-// ------------------------------------------------------------
+// ============================================================
 
 interface ProductFormProps {
   open: boolean;
@@ -89,12 +128,22 @@ interface ProductFormProps {
   onSuccess?: () => void;
 }
 
-// ------------------------------------------------------------
+// ============================================================
 // Composant
-// ------------------------------------------------------------
+// ============================================================
 
-export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }: ProductFormProps) {
-  const isEditing = !!product;
+export function ProductForm({
+  open,
+  onOpenChange,
+  brandId,
+  product,
+  onSuccess,
+}: ProductFormProps) {
+  const isEditing = Boolean(product);
+
+  // ==========================================================
+  // React Hook Form
+  // ==========================================================
 
   const {
     register,
@@ -108,132 +157,295 @@ export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }:
     defaultValues: EMPTY_VALUES,
   });
 
+  // ==========================================================
+  // Synchronisation ouverture / produit
+  // ==========================================================
+
   useEffect(() => {
-    if (!open) return;
-    reset(
-      product
-        ? {
-            name: product.name,
-            description: product.description ?? '',
-            price: product.price,
-            isMenu: product.isMenu,
-            isAvailable: product.isAvailable,
-            nutriScore: (product.nutriScore as ProductFormValues['nutriScore']) ?? 'NONE',
-            orderdisplay: product.orderdisplay,
-          }
-        : EMPTY_VALUES
-    );
+    if (!open) {
+      return;
+    }
+
+    if (!product) {
+      reset(EMPTY_VALUES);
+      return;
+    }
+
+    reset({
+      name: product.name ?? "",
+
+      slug: product.slug ?? "",
+
+      description: product.description ?? "",
+
+      price: Number.isFinite(product.price) ? product.price : 0,
+
+      isMenu: Boolean(product.isMenu),
+
+      isAvailable: Boolean(product.isAvailable),
+
+      /*
+        Les anciens produits peuvent éventuellement
+        avoir une valeur absente/null.
+        Dans ce cas on utilise NC.
+      */
+      nutriScore:
+        product.nutriScore === "A" ||
+        product.nutriScore === "B" ||
+        product.nutriScore === "C" ||
+        product.nutriScore === "D" ||
+        product.nutriScore === "E"
+          ? product.nutriScore
+          : "NC",
+
+      orderdisplay: Number.isFinite(product.orderdisplay)
+        ? product.orderdisplay
+        : 0,
+    });
   }, [open, product, reset]);
 
-  const isMenuValue = watch('isMenu');
-  const isAvailableValue = watch('isAvailable');
-  const nutriScoreValue = watch('nutriScore');
+  // ==========================================================
+  // Valeurs observées
+  // ==========================================================
+
+  const isMenuValue = watch("isMenu");
+  const isAvailableValue = watch("isAvailable");
+
+  // ==========================================================
+  // Soumission
+  // ==========================================================
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
       const payload = {
-        name: values.name,
-        description: values.description || undefined,
+        name: values.name.trim(),
+
+        slug: values.slug.trim(),
+
+        description: values.description?.trim() || undefined,
+
         price: values.price,
+
         isMenu: values.isMenu,
+
         isAvailable: values.isAvailable,
-        nutriScore: values.nutriScore === 'NONE' ? undefined : values.nutriScore,
+
+        /*
+          NutriCare reste silencieux.
+          La valeur est néanmoins envoyée à la base.
+        */
+        nutriScore: values.nutriScore,
+
         orderdisplay: values.orderdisplay,
+
         brandId,
       };
 
+      // ======================================================
+      // Modification
+      // ======================================================
+
       if (isEditing && product) {
         await updateProduct(product.id, payload);
-      } else {
+      }
+
+      // ======================================================
+      // Création
+      // ======================================================
+      else {
         await createProduct(payload);
       }
 
+      // ======================================================
+      // Succès
+      // ======================================================
+
       onSuccess?.();
+
       onOpenChange(false);
-    } catch (err) {
-      console.error('Erreur lors de la sauvegarde du produit :', err);
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde du produit :", error);
     }
   };
 
+  // ==========================================================
+  // Rendu
+  // ==========================================================
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
+        {/* ====================================================
+            En-tête
+            ==================================================== */}
+
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Modifier le produit' : 'Nouveau produit'}</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Modifier le produit" : "Nouveau produit"}
+          </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        {/* ====================================================
+            Formulaire
+            ==================================================== */}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* ==================================================
+              Nom
+              ================================================== */}
+
           <div className="space-y-1">
             <Label htmlFor="product-name">Nom</Label>
-            <Input id="product-name" {...register('name')} />
-            {errors.name && <p className="text-xs text-red-600">{errors.name.message}</p>}
+
+            <Input
+              id="product-name"
+              {...register("name")}
+              placeholder="Ex : Burger Deluxe"
+            />
+
+            {errors.name && (
+              <p className="text-xs text-red-600">{errors.name.message}</p>
+            )}
           </div>
+
+          {/* ==================================================
+              Slug
+              ================================================== */}
+
+          <div className="space-y-1">
+            <Label htmlFor="product-slug">Slug</Label>
+
+            <Input
+              id="product-slug"
+              {...register("slug")}
+              placeholder="burger-deluxe"
+            />
+
+            {errors.slug && (
+              <p className="text-xs text-red-600">{errors.slug.message}</p>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              Identifiant URL du produit.
+            </p>
+          </div>
+
+          {/* ==================================================
+              Description
+              ================================================== */}
 
           <div className="space-y-1">
             <Label htmlFor="product-description">Description</Label>
-            <Textarea id="product-description" rows={3} {...register('description')} />
+
+            <Textarea
+              id="product-description"
+              rows={3}
+              {...register("description")}
+              placeholder="Description du produit..."
+            />
           </div>
 
+          {/* ==================================================
+              Prix / Ordre
+              ================================================== */}
+
           <div className="grid grid-cols-2 gap-3">
+            {/* Prix */}
+
             <div className="space-y-1">
-              <Label htmlFor="product-price">Prix (€)</Label>
+              <Label htmlFor="product-price">Prix</Label>
+
               <Input
                 id="product-price"
                 type="number"
                 step="0.01"
                 min="0"
-                {...register('price', { valueAsNumber: true })}
+                {...register("price", {
+                  valueAsNumber: true,
+                })}
               />
-              {errors.price && <p className="text-xs text-red-600">{errors.price.message}</p>}
+
+              {errors.price && (
+                <p className="text-xs text-red-600">{errors.price.message}</p>
+              )}
             </div>
+
+            {/* Ordre */}
+
             <div className="space-y-1">
               <Label htmlFor="product-orderdisplay">Ordre d'affichage</Label>
+
               <Input
                 id="product-orderdisplay"
                 type="number"
                 step="1"
-                {...register('orderdisplay', { valueAsNumber: true })}
+                min="0"
+                {...register("orderdisplay", {
+                  valueAsNumber: true,
+                })}
               />
+
+              {errors.orderdisplay && (
+                <p className="text-xs text-red-600">
+                  {errors.orderdisplay.message}
+                </p>
+              )}
             </div>
           </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="product-nutriscore">Nutri-Score</Label>
-            <Select
-              value={nutriScoreValue}
-              onValueChange={(v) => setValue('nutriScore', v as ProductFormValues['nutriScore'])}
-            >
-              <SelectTrigger id="product-nutriscore">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="NONE">— Aucun</SelectItem>
-                <SelectItem value="A">A</SelectItem>
-                <SelectItem value="B">B</SelectItem>
-                <SelectItem value="C">C</SelectItem>
-                <SelectItem value="D">D</SelectItem>
-                <SelectItem value="E">E</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* ==================================================
+              Type Menu
+              ================================================== */}
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Switch
               id="product-ismenu"
               checked={isMenuValue}
-              onCheckedChange={(checked) => setValue('isMenu', checked)}
+              onCheckedChange={(checked) =>
+                setValue("isMenu", checked, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                })
+              }
             />
+
             <Label htmlFor="product-ismenu">Ce produit est un menu</Label>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* ==================================================
+              Disponibilité
+              ================================================== */}
+
+          <div className="flex items-center gap-3">
             <Switch
               id="product-isavailable"
               checked={isAvailableValue}
-              onCheckedChange={(checked) => setValue('isAvailable', checked)}
+              onCheckedChange={(checked) =>
+                setValue("isAvailable", checked, {
+                  shouldValidate: true,
+                  shouldDirty: true,
+                })
+              }
             />
+
             <Label htmlFor="product-isavailable">Disponible à la vente</Label>
           </div>
+
+          {/* ==================================================
+              NutriCare
+              ==================================================
+
+              Pas d'affichage volontaire.
+
+              Le formulaire conserve simplement :
+                  nutriScore = "NC"
+
+              et le transmet à createProduct/updateProduct.
+              ================================================== */}
+
+          {/* ==================================================
+              Actions
+              ================================================== */}
 
           <DialogFooter>
             <Button
@@ -244,8 +456,9 @@ export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }:
             >
               Annuler
             </Button>
+
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+              {isSubmitting ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </DialogFooter>
         </form>
@@ -253,4 +466,3 @@ export function ProductForm({ open, onOpenChange, brandId, product, onSuccess }:
     </Dialog>
   );
 }
-/*nutricare deviens silencieux ici une simple valeur par defaut est passé "NC" */
