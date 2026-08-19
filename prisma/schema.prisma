@@ -12,14 +12,14 @@ datasource db {
 // ============================================================
 
 model User {
-  id             String    @id @default(cuid())
-  name           String
-  email          String    @unique
-  emailVerified  Boolean   @default(false)
-  image          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 
   // Relations
   accounts             Account[]
@@ -98,7 +98,7 @@ model Role {
   userRoles   UserRole[]
 }
 
-model UserRole { // table de liaison
+model UserRole {
   userId String
   roleId String
   role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
@@ -129,21 +129,21 @@ model PermissionAction {
 // ============================================================
 
 model Profil {
-  id                String              @id @default(cuid())
-  bio               String              @default("")
-  preferredLanguage String              @default("FR")
-  userId            String              @unique
-  phone             String
-  notifPush         Boolean             @default(true)
-  notifEmail        Boolean             @default(true)
-  notifSms          Boolean             @default(false)
-  deletedAt         DateTime?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  profilAllergies   ProfilAllergy[]
+  id                 String              @id @default(cuid())
+  bio                String              @default("")
+  preferredLanguage  String              @default("FR")
+  userId             String              @unique
+  phone              String
+  notifPush          Boolean             @default(true)
+  notifEmail         Boolean             @default(true)
+  notifSms           Boolean             @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profilAllergies    ProfilAllergy[]
   profilDietaryPrefs ProfilDietaryPref[]
-  addresses         Address[]
+  addresses          Address[]
 }
 
 model ProfilAllergy {
@@ -235,11 +235,11 @@ model LoyaltyProgramConfig {
 }
 
 model LoyaltyReward {
-  id                    String                @id @default(cuid())
-  level                 String
-  description           String
-  configId              String
-  loyaltyProgramConfig  LoyaltyProgramConfig  @relation(fields: [configId], references: [id], onDelete: Cascade)
+  id                   String               @id @default(cuid())
+  level                String
+  description          String
+  configId             String
+  loyaltyProgramConfig LoyaltyProgramConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
 
   @@index([configId])
 }
@@ -260,12 +260,12 @@ model Brand {
   updatedAt             DateTime               @updatedAt
   brandTypes            BrandType[]
   faqs                  FaqBrand[]
-  financialReports       FinancialReport[]
-  payouts                Payout[]
-  products               Product[]
-  promotions             Promotion[]
-  qualityProgramWinners  QualityProgramWinner[]
-  sites                  Site[]
+  financialReports      FinancialReport[]
+  payouts               Payout[]
+  products              Product[]
+  promotions            Promotion[]
+  qualityProgramWinners QualityProgramWinner[]
+  sites                 Site[]
 }
 
 model BrandType {
@@ -331,17 +331,17 @@ model Product {
   brandId String
   brand   Brand  @relation(fields: [brandId], references: [id])
 
-  // Relations
-  cartItems         CartItem[]
-  menu              Menu?
-  menuSectionItems  MenuSectionItem[]
-  nutritionalInfo   NutritionalInfo?
-  optionGroups      OptionGroup[]
-  orderItems        OrderItem[]
-  productAllergens  ProductAllergen[]
-  productScores     ProductScore[]
-  productStocks     ProductStock[]
-  recipe            Recipe?
+  // Relations 
+  cartItems        CartItem[]
+  menu             Menu?
+  menuSectionItems MenuSectionItem[]
+  nutritionalInfo  NutritionalInfo?
+  optionGroups     OptionGroup[]
+  orderItems       OrderItem[]
+  productAllergens ProductAllergen[]
+  productScores    ProductScore[]
+  productStocks    ProductStock[]
+  recipe           Recipe?
 
   // Liaison many-to-many avec les catégories
   categoryAssignments CategoryAssignmentProduct[]
@@ -427,6 +427,7 @@ model ProductScore {
 
 model NutritionalInfo {
   id            String  @id @default(cuid())
+  nutriScore    String?
   calories      Float
   proteins      Float
   carbohydrates Float
@@ -476,10 +477,10 @@ model OptionAllergen {
 // ----- MENUS -----
 
 model Menu {
-  id          String        @id @default(cuid())
-  title       String
-  productId   String        @unique
-  product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id           String        @id @default(cuid())
+  title        String
+  productId    String        @unique
+  product      Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
   menuSections MenuSection[]
 }
 
@@ -517,10 +518,10 @@ model ProductRelation {
   product        Product @relation("ProductRelations", fields: [productId], references: [id], onDelete: Cascade)
   relatedProduct Product @relation("RelatedProducts", fields: [relatedProductId], references: [id], onDelete: Cascade)
 
+  @@unique([productId, relatedProductId, type])
   // Index et contraintes
   @@index([productId])
   @@index([relatedProductId])
-  @@unique([productId, relatedProductId, type])
 }
 
 model ProductStock {
@@ -554,23 +555,51 @@ model Recipe {
 }
 
 model Ingredient {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
+  allergen  Allergen[]
   name      String
   quantity  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   recipeId  String
-  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipe    Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@index([recipeId])
 }
 
+model Allergen {
+  id           String @id @default(cuid())
+  orderDisplay Int    @default(0)
+  slug         String
+  name         String
+  Description  String
+
+  ingredients Ingredient[]
+}
+
+enum AllergenListe {
+  Gluten
+  Lait
+  Œuf
+  Arachide
+  Soja
+  FruitsAcoque
+  Poisson
+  Crustacés
+  Céleri
+  Moutarde
+  Sésame
+  Sulfites
+  Lupin
+  Mollusques
+}
+
 model Step {
-  id          String @id @default(cuid())
-  order       Int
-  description String
-  recipeId    String
-  recipe      Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  id            String @id @default(cuid())
+  orderdispalay Int
+  description   String
+  recipeId      String
+  recipe        Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@index([recipeId])
 }
@@ -695,13 +724,13 @@ model OrderItemOption {
 // ============================================================
 
 model Driver {
-  id                String             @id @default(cuid())
-  status            String             @default("OFFLINE")
-  currentLat        Float?
-  currentLng        Float?
-  rating            Float              @default(0)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  id         String   @id @default(cuid())
+  status     String   @default("OFFLINE")
+  currentLat Float?
+  currentLng Float?
+  rating     Float    @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   userId            String             @unique
   user              User               @relation(fields: [userId], references: [id])
@@ -733,7 +762,7 @@ model Delivery {
   driverComent        String?
   deletedAt           DateTime?
   createdAt           DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
+  updatedAt           DateTime     @updatedAt
   orderId             String       @unique
   driverId            String
   driver              Driver       @relation(fields: [driverId], references: [id])
@@ -873,19 +902,19 @@ model FraudAlert {
 // ============================================================
 
 model Review {
-  id               String            @id @default(cuid())
-  targetType       String
-  targetId         String
-  globalRating     Float
-  comment          String?
-  photoUrl         String?
-  isAnonymous      Boolean           @default(false)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  authorId         String
-  author           User              @relation(fields: [authorId], references: [id])
-  ratingCriteria   RatingCriterion[]
-  reviewFlags      ReviewFlag[]
+  id             String            @id @default(cuid())
+  targetType     String
+  targetId       String
+  globalRating   Float
+  comment        String?
+  photoUrl       String?
+  isAnonymous    Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  authorId       String
+  author         User              @relation(fields: [authorId], references: [id])
+  ratingCriteria RatingCriterion[]
+  reviewFlags    ReviewFlag[]
 }
 
 model RatingCriterion {
@@ -949,17 +978,17 @@ model QualityProgramWinner {
 // ============================================================
 
 model BlogPost {
-  id          String        @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   content     String
   excerpt     String?
   category    String
   imageUrl    String?
-  published   Boolean       @default(false)
+  published   Boolean   @default(false)
   publishedAt DateTime?
-  createdAt   DateTime      @default(now())
+  createdAt   DateTime  @default(now())
   deletedAt   DateTime?
-  updatedAt   DateTime      @updatedAt
+  updatedAt   DateTime  @updatedAt
 
   authorId String
   author   User          @relation(fields: [authorId], references: [id])
@@ -1011,15 +1040,15 @@ model GalleryImage {
 // ============================================================
 
 model GlobalAnnouncement {
-  id             String                @id @default(cuid())
-  title          String
-  message        String
-  importance     String                @default("INFO")
-  targetSegment  String?
-  startAt        DateTime
-  endAt          DateTime?
-  createdAt      DateTime              @default(now())
-  channels       AnnouncementChannel[]
+  id            String                @id @default(cuid())
+  title         String
+  message       String
+  importance    String                @default("INFO")
+  targetSegment String?
+  startAt       DateTime
+  endAt         DateTime?
+  createdAt     DateTime              @default(now())
+  channels      AnnouncementChannel[]
 }
 
 model AnnouncementChannel {
@@ -1048,18 +1077,18 @@ model Notification {
 // ============================================================
 
 model SupportTicket {
-  id           String        @id @default(cuid())
-  subject      String
-  status       String        @default("OPEN")
-  priority     String        @default("NORMAL")
-  deletedAt    DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  userId       String
-  orderId      String?
-  user         User          @relation(fields: [userId], references: [id])
-  order        Order?        @relation(fields: [orderId], references: [id])
-  messages     ChatMessage[]
+  id        String        @id @default(cuid())
+  subject   String
+  status    String        @default("OPEN")
+  priority  String        @default("NORMAL")
+  deletedAt DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  userId    String
+  orderId   String?
+  user      User          @relation(fields: [userId], references: [id])
+  order     Order?        @relation(fields: [orderId], references: [id])
+  messages  ChatMessage[]
 }
 
 model ChatMessage {
@@ -1154,29 +1183,29 @@ model SurveyTargetSegment {
 // ============================================================
 
 model UserVoiceSuggestion {
-  id            String              @id @default(cuid())
+  id            String             @id @default(cuid())
   title         String
   description   String
   category      String
-  status        String              @default("SOUMISE")
-  votes         Int                 @default(0)
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
+  status        String             @default("SOUMISE")
+  votes         Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
   authorId      String
   roadmapItemId String?
-  author        User                @relation(fields: [authorId], references: [id])
-  roadmapItem   RoadmapItem?        @relation(fields: [roadmapItemId], references: [id])
+  author        User               @relation(fields: [authorId], references: [id])
+  roadmapItem   RoadmapItem?       @relation(fields: [roadmapItemId], references: [id])
   comments      UserVoiceComment[]
 }
 
 model UserVoiceComment {
-  id           String               @id @default(cuid())
+  id           String              @id @default(cuid())
   content      String
-  createdAt    DateTime             @default(now())
+  createdAt    DateTime            @default(now())
   suggestionId String
   authorId     String
-  author       User                 @relation(fields: [authorId], references: [id])
-  suggestion   UserVoiceSuggestion  @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+  author       User                @relation(fields: [authorId], references: [id])
+  suggestion   UserVoiceSuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
 
   @@index([suggestionId])
 }
@@ -1196,17 +1225,17 @@ model RoadmapItem {
 // ============================================================
 
 model FinancialReport {
-  id                    String                 @id @default(cuid())
-  periodStart           DateTime
-  periodEnd             DateTime
-  grossRevenue          Float
-  commissionTotal       Float
-  deliveryFees          Float
-  netAmount             Float
-  transactionCount      Int
-  brandId               String
-  brand                 Brand                  @relation(fields: [brandId], references: [id])
-  transactions          FinancialTransaction[]
+  id               String                 @id @default(cuid())
+  periodStart      DateTime
+  periodEnd        DateTime
+  grossRevenue     Float
+  commissionTotal  Float
+  deliveryFees     Float
+  netAmount        Float
+  transactionCount Int
+  brandId          String
+  brand            Brand                  @relation(fields: [brandId], references: [id])
+  transactions     FinancialTransaction[]
 }
 
 model FinancialTransaction {

@@ -30,6 +30,7 @@ import {
   Code2,
   Database,
   FileCode2,
+  FolderTree,
   GitBranch,
   Palette,
   Terminal,
@@ -78,10 +79,8 @@ const sections: SubSection[] = [
       "bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400",
     badgeClass:
       "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-900 dark:bg-purple-950/50 dark:text-purple-300",
-    gradientClass:
-      "from-purple-500/10 via-pink-500/5 to-transparent",
+    gradientClass: "from-purple-500/10 via-pink-500/5 to-transparent",
   },
-
   {
     title: "Design UX",
     description:
@@ -93,10 +92,8 @@ const sections: SubSection[] = [
       "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
     badgeClass:
       "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300",
-    gradientClass:
-      "from-emerald-500/10 via-cyan-500/5 to-transparent",
+    gradientClass: "from-emerald-500/10 via-cyan-500/5 to-transparent",
   },
-
   {
     title: "Stack",
     description:
@@ -108,10 +105,8 @@ const sections: SubSection[] = [
       "bg-orange-100 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400",
     badgeClass:
       "border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/50 dark:text-orange-300",
-    gradientClass:
-      "from-orange-500/10 via-red-500/5 to-transparent",
+    gradientClass: "from-orange-500/10 via-red-500/5 to-transparent",
   },
-
   {
     title: "Scrum",
     description:
@@ -123,10 +118,8 @@ const sections: SubSection[] = [
       "bg-blue-100 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400",
     badgeClass:
       "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-300",
-    gradientClass:
-      "from-blue-500/10 via-indigo-500/5 to-transparent",
+    gradientClass: "from-blue-500/10 via-indigo-500/5 to-transparent",
   },
-
   {
     title: "Schema",
     description:
@@ -138,10 +131,8 @@ const sections: SubSection[] = [
       "bg-cyan-100 text-cyan-600 dark:bg-cyan-950/50 dark:text-cyan-400",
     badgeClass:
       "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-900 dark:bg-cyan-950/50 dark:text-cyan-300",
-    gradientClass:
-      "from-cyan-500/10 via-blue-500/5 to-transparent",
+    gradientClass: "from-cyan-500/10 via-blue-500/5 to-transparent",
   },
-
   {
     title: "CMD",
     description:
@@ -153,23 +144,33 @@ const sections: SubSection[] = [
       "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
     badgeClass:
       "border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
-    gradientClass:
-      "from-slate-500/10 via-gray-500/5 to-transparent",
+    gradientClass: "from-slate-500/10 via-gray-500/5 to-transparent",
   },
-
   {
     title: "Scénarios",
     description:
       "Scénarios fonctionnels, parcours utilisateurs et cas d'utilisation permettant de valider les comportements de l'application.",
-    url: "/r&d/senarie",
+    url: "/r&d/scenari", // URL corrigée (anciennement "senarie")
     badge: "Fonctionnel",
     icon: FileCode2,
     iconClass:
       "bg-pink-100 text-pink-600 dark:bg-pink-950/50 dark:text-pink-400",
     badgeClass:
       "border-pink-200 bg-pink-50 text-pink-700 dark:border-pink-900 dark:bg-pink-950/50 dark:text-pink-300",
-    gradientClass:
-      "from-pink-500/10 via-rose-500/5 to-transparent",
+    gradientClass: "from-pink-500/10 via-rose-500/5 to-transparent",
+  },
+  {
+    title: "Archi",
+    description:
+      "Liste des fichiers de l'application avec leur en-tête et leur rôle.",
+    url: "/r&d/archi",
+    badge: "Structure",
+    icon: FolderTree, // Icône plus pertinente pour l'architecture de fichiers
+    iconClass:
+      "bg-teal-100 text-teal-600 dark:bg-teal-950/50 dark:text-teal-400",
+    badgeClass:
+      "border-teal-200 bg-teal-50 text-teal-700 dark:border-teal-900 dark:bg-teal-950/50 dark:text-teal-300",
+    gradientClass: "from-teal-500/10 via-emerald-500/5 to-transparent",
   },
 ];
 
@@ -215,9 +216,8 @@ export default function RdHomePage() {
             {/* Description */}
 
             <p className="mt-5 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
-              Centralisez les ressources nécessaires au
-              développement de l'application : IA, design,
-              stack technique, données, commandes et
+              Centralisez les ressources nécessaires au développement de
+              l'application : IA, design, stack technique, données, commandes et
               documentation agile.
             </p>
 
@@ -228,18 +228,14 @@ export default function RdHomePage() {
                 <span className="font-bold text-slate-900 dark:text-white">
                   {sections.length}
                 </span>{" "}
-                <span className="text-slate-500">
-                  ressources
-                </span>
+                <span className="text-slate-500">ressources</span>
               </div>
 
               <div className="rounded-xl border bg-white px-4 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-800">
                 <span className="font-bold text-slate-900 dark:text-white">
                   Documentation
                 </span>{" "}
-                <span className="text-slate-500">
-                  interne
-                </span>
+                <span className="text-slate-500">interne</span>
               </div>
             </div>
           </div>
@@ -256,8 +252,7 @@ export default function RdHomePage() {
             </h2>
 
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Sélectionnez une ressource pour accéder à sa
-              documentation.
+              Sélectionnez une ressource pour accéder à sa documentation.
             </p>
           </div>
 
@@ -288,10 +283,7 @@ export default function RdHomePage() {
 
                       {/* Badge */}
 
-                      <Badge
-                        variant="outline"
-                        className={section.badgeClass}
-                      >
+                      <Badge variant="outline" className={section.badgeClass}>
                         {section.badge}
                       </Badge>
                     </div>
@@ -315,8 +307,15 @@ export default function RdHomePage() {
                      * Le résultat HTML est donc un <a> stylé comme
                      * un bouton, au lieu d'avoir un <a> dans un <button>.
                      */}
-
-<Link href={section.url} className="group/button inline-flex h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-xs transition-all outline-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-100 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-slate-600" > <span> Explorer </span> <ArrowRight className="ml-auto h-4 w-4 transition-transform duration-200 group-hover/button:translate-x-1" /> </Link>                  </CardContent>
+                    <Link
+                      href={section.url}
+                      className="group/button inline-flex h-10 w-full items-center justify-center rounded-xl border border-slate-200 bg-transparent px-4 py-2 text-sm font-medium text-slate-900 shadow-xs transition-all outline-none hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-100 dark:hover:border-slate-600 dark:hover:bg-slate-800 dark:focus-visible:ring-slate-600"
+                    >
+                      {" "}
+                      <span> Explorer </span>{" "}
+                      <ArrowRight className="ml-auto h-4 w-4 transition-transform duration-200 group-hover/button:translate-x-1" />{" "}
+                    </Link>{" "}
+                  </CardContent>
                 </Card>
               );
             })}
@@ -329,8 +328,7 @@ export default function RdHomePage() {
 
         <footer className="mt-12 border-t border-slate-200 pt-6 dark:border-slate-800">
           <p className="text-center text-xs text-slate-400 dark:text-slate-600">
-            Documentation interne réservée à l'équipe de
-            développement.
+            Documentation interne réservée à l'équipe de développement.
           </p>
         </footer>
       </div>

@@ -27,9 +27,9 @@
  - États vides distincts pour "aucun produit" et "aucun résultat de recherche".
 */
 
-'use client';
+"use client";
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from "react";
 import {
   Table,
   TableBody,
@@ -37,26 +37,34 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Pencil, Trash2, Package, Copy, Check, Code2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
-import type { Product } from '@/lib/generated/prisma/client';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Search,
+  Pencil,
+  Trash2,
+  Package,
+  Copy,
+  Check,
+  Code2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import type { Product } from "@/lib/generated/prisma/client";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 // ------------------------------------------------------------
 // Types et constantes
@@ -70,14 +78,14 @@ interface ProductDisplayProps {
 }
 
 const NUTRISCORE_COLORS: Record<string, string> = {
-  A: 'bg-emerald-100 text-emerald-700',
-  B: 'bg-lime-100 text-lime-700',
-  C: 'bg-yellow-100 text-yellow-700',
-  D: 'bg-orange-100 text-orange-700',
-  E: 'bg-red-100 text-red-700',
+  A: "bg-emerald-100 text-emerald-700",
+  B: "bg-lime-100 text-lime-700",
+  C: "bg-yellow-100 text-yellow-700",
+  D: "bg-orange-100 text-orange-700",
+  E: "bg-red-100 text-red-700",
 };
 
-type AvailabilityFilter = 'ALL' | 'AVAILABLE' | 'UNAVAILABLE';
+type AvailabilityFilter = "ALL" | "AVAILABLE" | "UNAVAILABLE";
 
 const PRODUCT_TYPE_EXCERPT = `type Product = {
   id: string;
@@ -126,38 +134,44 @@ export function ProductDisplay({
   onEdit,
   onDelete,
 }: ProductDisplayProps) {
-  const [search, setSearch] = useState('');
-  const [availabilityFilter, setAvailabilityFilter] = useState<AvailabilityFilter>('ALL');
+  const [search, setSearch] = useState("");
+  const [availabilityFilter, setAvailabilityFilter] =
+    useState<AvailabilityFilter>("ALL");
   const [copied, setCopied] = useState(false);
   const [copiedExcerpt, setCopiedExcerpt] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesSearch =
-        search === '' ||
+        search === "" ||
         product.name.toLowerCase().includes(search.toLowerCase()) ||
         product.slug.toLowerCase().includes(search.toLowerCase()) ||
-        (product.description ?? '').toLowerCase().includes(search.toLowerCase());
+        (product.description ?? "")
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
       const matchesAvailability =
-        availabilityFilter === 'ALL' ||
-        (availabilityFilter === 'AVAILABLE' && product.isAvailable) ||
-        (availabilityFilter === 'UNAVAILABLE' && !product.isAvailable);
+        availabilityFilter === "ALL" ||
+        (availabilityFilter === "AVAILABLE" && product.isAvailable) ||
+        (availabilityFilter === "UNAVAILABLE" && !product.isAvailable);
 
       return matchesSearch && matchesAvailability;
     });
   }, [products, search, availabilityFilter]);
 
-  const productsJson = useMemo(() => JSON.stringify(products, null, 2), [products]);
+  const productsJson = useMemo(
+    () => JSON.stringify(products, null, 2),
+    [products],
+  );
 
   const handleCopyJson = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(productsJson);
       setCopied(true);
-      toast.success('JSON copié dans le presse-papiers');
+      toast.success("JSON copié dans le presse-papiers");
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Impossible de copier le JSON');
+      toast.error("Impossible de copier le JSON");
     }
   }, [productsJson]);
 
@@ -166,22 +180,28 @@ export function ProductDisplay({
     try {
       await navigator.clipboard.writeText(excerpt);
       setCopiedExcerpt(true);
-      toast.success('Extrait de code copié');
+      toast.success("Extrait de code copié");
       setTimeout(() => setCopiedExcerpt(false), 2000);
     } catch {
-      toast.error('Impossible de copier l’extrait de code');
+      toast.error("Impossible de copier l’extrait de code");
     }
   }, []);
 
   const formatPrice = useCallback((price: number): string => {
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price);
+    return new Intl.NumberFormat("fr-FR", {
+      style: "currency",
+      currency: "EUR",
+    }).format(price);
   }, []);
 
-  const truncateDescription = useCallback((desc: string | null, maxLength = 80): string => {
-    if (!desc) return '—';
-    if (desc.length <= maxLength) return desc;
-    return desc.substring(0, maxLength).trimEnd() + '…';
-  }, []);
+  const truncateDescription = useCallback(
+    (desc: string | null, maxLength = 80): string => {
+      if (!desc) return "—";
+      if (desc.length <= maxLength) return desc;
+      return desc.substring(0, maxLength).trimEnd() + "…";
+    },
+    [],
+  );
 
   // ----------------------------------------------------------
   // État de chargement avec skeleton
@@ -286,10 +306,16 @@ export function ProductDisplay({
             <TableHeader className="bg-gray-50 dark:bg-gray-800">
               <TableRow>
                 <TableHead>Produit</TableHead>
-                <TableHead className="hidden lg:table-cell">Description</TableHead>
+                <TableHead className="hidden lg:table-cell">
+                  Description
+                </TableHead>
                 <TableHead className="w-[100px]">Prix</TableHead>
-                <TableHead className="hidden md:table-cell w-[90px] text-center">Type</TableHead>
-                <TableHead className="w-[90px] text-center">Nutri-Score</TableHead>
+                <TableHead className="hidden md:table-cell w-[90px] text-center">
+                  Type
+                </TableHead>
+                <TableHead className="w-[90px] text-center">
+                  Nutri-Score
+                </TableHead>
                 <TableHead className="w-[110px] text-center">Statut</TableHead>
                 <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
@@ -299,8 +325,8 @@ export function ProductDisplay({
                 <TableRow
                   key={`product-row-${product.id}`}
                   className={cn(
-                    'transition-colors hover:bg-indigo-50/40 dark:hover:bg-gray-700/40',
-                    product.deletedAt && 'opacity-60'
+                    "transition-colors hover:bg-indigo-50/40 dark:hover:bg-gray-700/40",
+                    product.deletedAt && "opacity-60",
                   )}
                 >
                   <TableCell className="font-medium text-gray-800 dark:text-gray-100">
@@ -321,13 +347,16 @@ export function ProductDisplay({
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-center">
                     <Badge variant="outline" className="text-xs">
-                      {product.isMenu ? '🍽️ Menu' : '🍴 Produit'}
+                      {product.isMenu ? "🍽️ Menu" : "🍴 Produit"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     {product.nutriScore ? (
                       <Badge
-                        className={cn('text-xs font-bold', NUTRISCORE_COLORS[product.nutriScore])}
+                        className={cn(
+                          "text-xs font-bold",
+                          NUTRISCORE_COLORS[product.nutriScore],
+                        )}
                       >
                         {product.nutriScore}
                       </Badge>
@@ -337,10 +366,14 @@ export function ProductDisplay({
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge
-                      variant={product.isAvailable ? 'default' : 'outline'}
-                      className={product.isAvailable ? 'bg-emerald-100 text-emerald-700' : 'text-gray-400'}
+                      variant={product.isAvailable ? "default" : "outline"}
+                      className={
+                        product.isAvailable
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "text-gray-400"
+                      }
                     >
-                      {product.isAvailable ? 'Disponible' : 'Indisponible'}
+                      {product.isAvailable ? "Disponible" : "Indisponible"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -357,7 +390,7 @@ export function ProductDisplay({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/20"
                         aria-label={`Supprimer ${product.name}`}
                         onClick={() => onDelete(product)}
                         disabled={!!product.deletedAt}
@@ -380,7 +413,12 @@ export function ProductDisplay({
             <Code2 className="h-4 w-4" />
             Référence du modèle Product
           </CardTitle>
-          <Button variant="outline" size="sm" onClick={handleCopyExcerpt} className="gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyExcerpt}
+            className="gap-1.5"
+          >
             {copiedExcerpt ? (
               <>
                 <Check className="h-3.5 w-3.5" />
@@ -399,7 +437,11 @@ export function ProductDisplay({
             language="typescript"
             style={oneDark}
             showLineNumbers
-            customStyle={{ borderRadius: '0.5rem', fontSize: '0.75rem', margin: 0 }}
+            customStyle={{
+              borderRadius: "0.5rem",
+              fontSize: "0.75rem",
+              margin: 0,
+            }}
           >
             {PRODUCT_TYPE_EXCERPT}
           </SyntaxHighlighter>
@@ -407,7 +449,11 @@ export function ProductDisplay({
             language="typescript"
             style={oneDark}
             showLineNumbers
-            customStyle={{ borderRadius: '0.5rem', fontSize: '0.75rem', margin: 0 }}
+            customStyle={{
+              borderRadius: "0.5rem",
+              fontSize: "0.75rem",
+              margin: 0,
+            }}
           >
             {PRISMA_MODEL_EXCERPT}
           </SyntaxHighlighter>
@@ -420,7 +466,12 @@ export function ProductDisplay({
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200">
             Sauvegarde manuelle (JSON)
           </h4>
-          <Button variant="outline" size="sm" onClick={handleCopyJson} className="gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCopyJson}
+            className="gap-1.5"
+          >
             {copied ? (
               <>
                 <Check className="h-3.5 w-3.5" />

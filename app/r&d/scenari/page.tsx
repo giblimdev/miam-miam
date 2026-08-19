@@ -1,4 +1,4 @@
-//@/app/r&d/senarie/page.tsx
+//@/app/r&d/senari/page.tsx
 /*
  role : Page de documentation des scénarios fonctionnels.
         Présente les parcours utilisateurs, les personas concernés,
@@ -41,14 +41,14 @@ Liste des chemins des fichiers :
 - /lib/data/personaData.ts (données des personas)
 */
 
-'use client';
+"use client";
 
 import {
   ArrowRight,
   CheckCircle2,
   ClipboardList,
   UserRound,
-} from 'lucide-react';
+} from "lucide-react";
 
 import {
   Card,
@@ -56,10 +56,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
-import { Badge } from '@/components/ui/badge';
-import { type Persona, personas } from '@/lib/data/personaDaata';
+import { Badge } from "@/components/ui/badge";
+import { type Persona, personas } from "@/lib/data/personaData";
 
 /* ============================================================
    TYPES
@@ -77,7 +77,7 @@ interface Senari {
   description: string;
   persona: Persona;
   steps: ScenarioStep[];
-  statut?: 'brouillon' | 'valide' | 'en_test';
+  statut?: "brouillon" | "valide" | "en_test";
 }
 
 /* ============================================================
@@ -86,223 +86,213 @@ interface Senari {
 
 const scenarios: Senari[] = [
   {
-    id: 'SCN-001',
-    titre: 'Créer un compte client',
+    id: "SCN-001",
+    titre: "Créer un compte client",
     description:
-      'Permettre à un nouveau client de créer son compte afin d\'utiliser les fonctionnalités de l\'application.',
+      "Permettre à un nouveau client de créer son compte afin d'utiliser les fonctionnalités de l'application.",
     persona: personas[0], // FinalClient
     steps: [
       {
-        id: 'STEP-001',
-        titre: 'Accéder à l\'inscription',
+        id: "STEP-001",
+        titre: "Accéder à l'inscription",
         description:
-          'Le client ouvre la page d\'inscription depuis la page de connexion.',
+          "Le client ouvre la page d'inscription depuis la page de connexion.",
       },
       {
-        id: 'STEP-002',
-        titre: 'Saisir ses informations',
+        id: "STEP-002",
+        titre: "Saisir ses informations",
         description:
-          'Le client renseigne son nom, son adresse email et son mot de passe.',
+          "Le client renseigne son nom, son adresse email et son mot de passe.",
       },
       {
-        id: 'STEP-003',
-        titre: 'Accepter les conditions',
+        id: "STEP-003",
+        titre: "Accepter les conditions",
         description:
-          'Le client accepte les conditions générales d\'utilisation.',
+          "Le client accepte les conditions générales d'utilisation.",
       },
       {
-        id: 'STEP-004',
-        titre: 'Créer le compte',
+        id: "STEP-004",
+        titre: "Créer le compte",
         description:
-          'Le système valide les données et crée le compte utilisateur.',
+          "Le système valide les données et crée le compte utilisateur.",
       },
       {
-        id: 'STEP-005',
-        titre: 'Accéder à son espace',
+        id: "STEP-005",
+        titre: "Accéder à son espace",
         description:
-          'Le client est connecté et peut accéder à son espace personnel.',
+          "Le client est connecté et peut accéder à son espace personnel.",
       },
     ],
-    statut: 'valide',
+    statut: "valide",
   },
   {
-    id: 'SCN-002',
-    titre: 'Passer une commande',
+    id: "SCN-002",
+    titre: "Passer une commande",
     description:
-      'Permettre à un client connecté de sélectionner des produits et de valider une commande.',
+      "Permettre à un client connecté de sélectionner des produits et de valider une commande.",
     persona: personas[0], // FinalClient
     steps: [
       {
-        id: 'STEP-001',
-        titre: 'Consulter le catalogue',
-        description: 'Le client consulte les produits disponibles.',
+        id: "STEP-001",
+        titre: "Consulter le catalogue",
+        description: "Le client consulte les produits disponibles.",
       },
       {
-        id: 'STEP-002',
-        titre: 'Ajouter des produits',
-        description: 'Le client ajoute les produits souhaités à son panier.',
+        id: "STEP-002",
+        titre: "Ajouter des produits",
+        description: "Le client ajoute les produits souhaités à son panier.",
       },
       {
-        id: 'STEP-003',
-        titre: 'Vérifier le panier',
+        id: "STEP-003",
+        titre: "Vérifier le panier",
         description:
-          'Le client vérifie les quantités, les prix et le montant total.',
+          "Le client vérifie les quantités, les prix et le montant total.",
       },
       {
-        id: 'STEP-004',
-        titre: 'Choisir une adresse',
-        description: 'Le client sélectionne son adresse de livraison.',
+        id: "STEP-004",
+        titre: "Choisir une adresse",
+        description: "Le client sélectionne son adresse de livraison.",
       },
       {
-        id: 'STEP-005',
-        titre: 'Valider la commande',
-        description:
-          'Le client confirme sa commande et procède au paiement.',
+        id: "STEP-005",
+        titre: "Valider la commande",
+        description: "Le client confirme sa commande et procède au paiement.",
       },
     ],
-    statut: 'brouillon',
+    statut: "brouillon",
   },
   {
-    id: 'SCN-003',
-    titre: 'Gérer les horaires d\'ouverture',
+    id: "SCN-003",
+    titre: "Gérer les horaires d'ouverture",
     description:
-      'Permettre au responsable de site de définir les horaires d\'ouverture de son établissement.',
+      "Permettre au responsable de site de définir les horaires d'ouverture de son établissement.",
     persona: personas[2], // SiteManager
     steps: [
       {
-        id: 'STEP-001',
-        titre: 'Accéder à la gestion du site',
+        id: "STEP-001",
+        titre: "Accéder à la gestion du site",
         description:
-          'Le responsable se connecte et accède au tableau de bord de son site.',
+          "Le responsable se connecte et accède au tableau de bord de son site.",
       },
       {
-        id: 'STEP-002',
-        titre: 'Ouvrir les paramètres',
-        description:
-          'Il navigue vers la section "Horaires d\'ouverture".',
+        id: "STEP-002",
+        titre: "Ouvrir les paramètres",
+        description: 'Il navigue vers la section "Horaires d\'ouverture".',
       },
       {
-        id: 'STEP-003',
-        titre: 'Définir les plages horaires',
+        id: "STEP-003",
+        titre: "Définir les plages horaires",
         description:
-          'Pour chaque jour, il saisit les heures d\'ouverture et de fermeture.',
+          "Pour chaque jour, il saisit les heures d'ouverture et de fermeture.",
       },
       {
-        id: 'STEP-004',
-        titre: 'Enregistrer les modifications',
-        description:
-          'Le système valide et enregistre les nouveaux horaires.',
+        id: "STEP-004",
+        titre: "Enregistrer les modifications",
+        description: "Le système valide et enregistre les nouveaux horaires.",
       },
     ],
-    statut: 'valide',
+    statut: "valide",
   },
   {
-    id: 'SCN-004',
-    titre: 'Accepter une livraison',
+    id: "SCN-004",
+    titre: "Accepter une livraison",
     description:
-      'Permettre au livreur de confirmer la prise en charge et la livraison d\'une commande.',
+      "Permettre au livreur de confirmer la prise en charge et la livraison d'une commande.",
     persona: personas[1], // Driver
     steps: [
       {
-        id: 'STEP-001',
-        titre: 'Recevoir une notification',
+        id: "STEP-001",
+        titre: "Recevoir une notification",
         description:
-          'Le livreur reçoit une notification de nouvelle commande à livrer.',
+          "Le livreur reçoit une notification de nouvelle commande à livrer.",
       },
       {
-        id: 'STEP-002',
-        titre: 'Accepter la course',
-        description:
-          'Il accepte la course et se rend au restaurant.',
+        id: "STEP-002",
+        titre: "Accepter la course",
+        description: "Il accepte la course et se rend au restaurant.",
       },
       {
-        id: 'STEP-003',
-        titre: 'Récupérer la commande',
-        description:
-          'Il valide la récupération avec le code OTP.',
+        id: "STEP-003",
+        titre: "Récupérer la commande",
+        description: "Il valide la récupération avec le code OTP.",
       },
       {
-        id: 'STEP-004',
-        titre: 'Livrer la commande',
-        description:
-          'Il se rend à l\'adresse et remet la commande au client.',
+        id: "STEP-004",
+        titre: "Livrer la commande",
+        description: "Il se rend à l'adresse et remet la commande au client.",
       },
       {
-        id: 'STEP-005',
-        titre: 'Confirmer la livraison',
+        id: "STEP-005",
+        titre: "Confirmer la livraison",
         description:
-          'Il confirme la livraison et prend une photo comme preuve.',
+          "Il confirme la livraison et prend une photo comme preuve.",
       },
     ],
-    statut: 'brouillon',
+    statut: "brouillon",
   },
   {
-    id: 'SCN-005',
-    titre: 'Créer une promotion',
+    id: "SCN-005",
+    titre: "Créer une promotion",
     description:
-      'Permettre au gestionnaire de marque de créer une campagne promotionnelle.',
+      "Permettre au gestionnaire de marque de créer une campagne promotionnelle.",
     persona: personas[3], // BrandManager
     steps: [
       {
-        id: 'STEP-001',
-        titre: 'Accéder au dashboard marketing',
+        id: "STEP-001",
+        titre: "Accéder au dashboard marketing",
         description:
-          'Le gestionnaire accède à la section promotions de sa marque.',
+          "Le gestionnaire accède à la section promotions de sa marque.",
       },
       {
-        id: 'STEP-002',
-        titre: 'Définir le type de promotion',
+        id: "STEP-002",
+        titre: "Définir le type de promotion",
         description:
-          'Il choisit entre pourcentage, montant fixe ou offre spéciale.',
+          "Il choisit entre pourcentage, montant fixe ou offre spéciale.",
       },
       {
-        id: 'STEP-003',
-        titre: 'Configurer les conditions',
+        id: "STEP-003",
+        titre: "Configurer les conditions",
         description:
-          'Il définit le code promo, la valeur, les dates et les sites concernés.',
+          "Il définit le code promo, la valeur, les dates et les sites concernés.",
       },
       {
-        id: 'STEP-004',
-        titre: 'Publier la promotion',
-        description:
-          'La promotion est activée et visible pour les clients.',
+        id: "STEP-004",
+        titre: "Publier la promotion",
+        description: "La promotion est activée et visible pour les clients.",
       },
     ],
-    statut: 'en_test',
+    statut: "en_test",
   },
   {
-    id: 'SCN-006',
-    titre: 'Traiter un ticket de support',
+    id: "SCN-006",
+    titre: "Traiter un ticket de support",
     description:
-      'Permettre à l\'agent de support de répondre à une demande client.',
+      "Permettre à l'agent de support de répondre à une demande client.",
     persona: personas[6], // ClientSupport
     steps: [
       {
-        id: 'STEP-001',
-        titre: 'Consulter les tickets',
-        description:
-          'L\'agent ouvre la file des tickets en attente.',
+        id: "STEP-001",
+        titre: "Consulter les tickets",
+        description: "L'agent ouvre la file des tickets en attente.",
       },
       {
-        id: 'STEP-002',
-        titre: 'Analyser la demande',
+        id: "STEP-002",
+        titre: "Analyser la demande",
         description:
-          'Il lit le message du client et consulte l\'historique de commande.',
+          "Il lit le message du client et consulte l'historique de commande.",
       },
       {
-        id: 'STEP-003',
-        titre: 'Répondre au client',
-        description:
-          'Il envoie une réponse via le chat de support.',
+        id: "STEP-003",
+        titre: "Répondre au client",
+        description: "Il envoie une réponse via le chat de support.",
       },
       {
-        id: 'STEP-004',
-        titre: 'Résoudre ou escalader',
-        description:
-          'Il résout le ticket ou le transfère au service concerné.',
+        id: "STEP-004",
+        titre: "Résoudre ou escalader",
+        description: "Il résout le ticket ou le transfère au service concerné.",
       },
     ],
-    statut: 'valide',
+    statut: "valide",
   },
 ];
 
@@ -313,15 +303,15 @@ const scenarios: Senari[] = [
 /**
  * Retourne le libellé d'affichage d'un statut de scénario.
  */
-function getStatusLabel(status: Senari['statut']): string {
+function getStatusLabel(status: Senari["statut"]): string {
   switch (status) {
-    case 'valide':
-      return 'Validé';
-    case 'en_test':
-      return 'En test';
-    case 'brouillon':
+    case "valide":
+      return "Validé";
+    case "en_test":
+      return "En test";
+    case "brouillon":
     default:
-      return 'Brouillon';
+      return "Brouillon";
   }
 }
 
@@ -329,16 +319,16 @@ function getStatusLabel(status: Senari['statut']): string {
  * Retourne la variante de Badge selon le statut.
  */
 function getStatusVariant(
-  status: Senari['statut']
-): 'default' | 'outline' | 'secondary' {
+  status: Senari["statut"],
+): "default" | "outline" | "secondary" {
   switch (status) {
-    case 'valide':
-      return 'default';
-    case 'en_test':
-      return 'secondary';
-    case 'brouillon':
+    case "valide":
+      return "default";
+    case "en_test":
+      return "secondary";
+    case "brouillon":
     default:
-      return 'outline';
+      return "outline";
   }
 }
 
@@ -393,9 +383,7 @@ export default function SenariePage() {
                       {scenario.id}
                     </Badge>
 
-                    <CardTitle className="text-xl">
-                      {scenario.titre}
-                    </CardTitle>
+                    <CardTitle className="text-xl">{scenario.titre}</CardTitle>
 
                     <CardDescription className="mt-2 leading-6">
                       {scenario.description}
@@ -481,7 +469,7 @@ export default function SenariePage() {
                 <div className="flex items-center justify-between border-t border-slate-200 pt-4 dark:border-slate-800">
                   <span className="text-xs text-slate-400">
                     {scenario.steps.length} étape
-                    {scenario.steps.length > 1 ? 's' : ''}
+                    {scenario.steps.length > 1 ? "s" : ""}
                   </span>
 
                   <button

@@ -20,11 +20,11 @@
  useBy : ProductStudioPage, composants outils, API routes, etc.
 */
 
-'use server';
+"use server";
 
-import { prisma } from '@/lib/prisma';
-import { revalidatePath, revalidateTag } from 'next/cache';
-import { GalleryTargetType, type Prisma } from '@/lib/generated/prisma/client';
+import { prisma } from "@/lib/prisma";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { GalleryTargetType, type Prisma } from "@/lib/generated/prisma/client";
 
 // ============================================================
 // 1. CONSTANTES & TYPES (source unique de vérité)
@@ -82,10 +82,10 @@ export type ProductListItem = Prisma.ProductGetPayload<{
 function generateSlug(name: string): string {
   return name
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 async function ensureProductExists(productId: string) {
@@ -93,7 +93,7 @@ async function ensureProductExists(productId: string) {
     where: { id: productId, deletedAt: null },
     select: { id: true },
   });
-  if (!product) throw new Error('Produit introuvable');
+  if (!product) throw new Error("Produit introuvable");
   return product;
 }
 
@@ -113,7 +113,7 @@ export async function getProducts(): Promise<ProductListItem[]> {
   try {
     const products = await prisma.product.findMany({
       where: { deletedAt: null },
-      orderBy: [{ orderdisplay: 'asc' }, { name: 'asc' }],
+      orderBy: [{ orderdisplay: "asc" }, { name: "asc" }],
       select: {
         id: true,
         name: true,
@@ -127,22 +127,33 @@ export async function getProducts(): Promise<ProductListItem[]> {
 
     // Un seul aller-retour pour toutes les vignettes (au lieu d'un par produit)
     const galleries = await prisma.gallery.findMany({
-      where: { targetType: GalleryTargetType.PRODUCT, targetId: { in: products.map((p) => p.id) } },
+      where: {
+        targetType: GalleryTargetType.PRODUCT,
+        targetId: { in: products.map((p) => p.id) },
+      },
       select: { targetId: true, mainImage: true },
     });
-    const thumbnailByProductId = new Map(galleries.map((g) => [g.targetId, g.mainImage]));
+    const thumbnailByProductId = new Map(
+      galleries.map((g) => [g.targetId, g.mainImage]),
+    );
 
     return products.map((p) => ({
       ...p,
       thumbnailUrl: thumbnailByProductId.get(p.id) ?? null,
     }));
   } catch (error) {
-    console.error('Erreur lors de la récupération des produits :', error);
-    throw new Error('Impossible de charger les produits');
+    console.error("Erreur lors de la récupération des produits :", error);
+    throw new Error("Impossible de charger les produits");
   }
 }
 
-export async function getProductWithRelations(id: string): Promise<ProductWithRelations | null> {
+/**
+ * Récupère un produit complet avec toutes ses relations (pour l'édition).
+ * Utilise PRODUCT_INCLUDE et ajoute la galerie.
+ */
+export async function getProductWithRelations(
+  id: string,
+): Promise<ProductWithRelations | null> {
   try {
     const [product, gallery] = await Promise.all([
       prisma.product.findUnique({
@@ -156,7 +167,41 @@ export async function getProductWithRelations(id: string): Promise<ProductWithRe
     return { ...product, gallery };
   } catch (error) {
     console.error(`Erreur lors de la récupération du produit ${id} :`, error);
-    throw new Error('Impossible de charger le produit');
+    throw new Error("Impossible de charger le produit");
+  }
+}
+
+/**
+ * Récupère un produit avec seulement les données scalaires (sans les relations lourdes).
+ * Idéal pour un affichage rapide ou un store léger.
+ */
+export async function getProductById(id: string) {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id, deletedAt: null },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        price: true,
+        isAvailable: true,
+        isMenu: true,
+        nutriScore: true,
+        orderdisplay: true,
+        brandId: true,
+        brand: { select: { id: true, name: true } },
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+    return product;
+  } catch (error) {
+    console.error(
+      `Erreur lors de la récupération du produit ${id} (scalaire) :`,
+      error,
+    );
+    throw new Error("Impossible de charger le produit");
   }
 }
 
@@ -196,12 +241,12 @@ export async function saveProduct(productData: ProductWithRelations) {
 
     await updateAllRelations(productId, productData);
 
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, productId };
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde du produit :', error);
-    return { success: false, error: 'Erreur lors de la sauvegarde' };
+    console.error("Erreur lors de la sauvegarde du produit :", error);
+    return { success: false, error: "Erreur lors de la sauvegarde" };
   }
 }
 
@@ -210,14 +255,18 @@ export async function saveProduct(productData: ProductWithRelations) {
  * Stratégie "delete + recreate" pour les relations enfants (simple et sûre pour un
  * formulaire qui renvoie l'état complet à chaque sauvegarde).
  */
-async function updateAllRelations(productId: string, productData: ProductWithRelations) {
+async function updateAllRelations(
+  productId: string,
+  productData: ProductWithRelations,
+) {
   // --- 4.1 Catégories (table de liaison, on garde le diff add/remove) ---
   const currentCats = await prisma.categoryAssignmentProduct.findMany({
     where: { productId },
     select: { categoryProductId: true },
   });
   const currentIds = currentCats.map((c) => c.categoryProductId);
-  const newIds = productData.categoryAssignments?.map((c) => c.categoryProductId) ?? [];
+  const newIds =
+    productData.categoryAssignments?.map((c) => c.categoryProductId) ?? [];
 
   for (const idToAdd of newIds.filter((cid) => !currentIds.includes(cid))) {
     await prisma.categoryAssignmentProduct.create({
@@ -247,7 +296,10 @@ async function updateAllRelations(productId: string, productData: ProductWithRel
   await prisma.productAllergen.deleteMany({ where: { productId } });
   if (productData.productAllergens?.length) {
     await prisma.productAllergen.createMany({
-      data: productData.productAllergens.map((a) => ({ value: a.value, productId })),
+      data: productData.productAllergens.map((a) => ({
+        value: a.value,
+        productId,
+      })),
     });
   }
 
@@ -255,13 +307,21 @@ async function updateAllRelations(productId: string, productData: ProductWithRel
   await prisma.productScore.deleteMany({ where: { productId } });
   if (productData.productScores?.length) {
     await prisma.productScore.createMany({
-      data: productData.productScores.map((s) => ({ type: s.type, score: s.score, productId })),
+      data: productData.productScores.map((s) => ({
+        type: s.type,
+        score: s.score,
+        productId,
+      })),
     });
   }
 
   // --- 4.5 Nutrition (relation 1-1, champ Product.nutritionalInfo) ---
   if (productData.nutritionalInfo) {
-    const { id: _nid, productId: _pid, ...nutrition } = productData.nutritionalInfo;
+    const {
+      id: _nid,
+      productId: _pid,
+      ...nutrition
+    } = productData.nutritionalInfo;
     await prisma.nutritionalInfo.upsert({
       where: { productId },
       update: nutrition,
@@ -296,7 +356,10 @@ async function updateAllRelations(productId: string, productData: ProductWithRel
           });
           if (option.optionAllergens?.length) {
             await prisma.optionAllergen.createMany({
-              data: option.optionAllergens.map((oa) => ({ value: oa.value, optionId: newOption.id })),
+              data: option.optionAllergens.map((oa) => ({
+                value: oa.value,
+                optionId: newOption.id,
+              })),
             });
           }
         }
@@ -307,7 +370,9 @@ async function updateAllRelations(productId: string, productData: ProductWithRel
   // --- 4.7 Menu (relation 1-1, champ Product.menu) ---
   await prisma.menu.deleteMany({ where: { productId } });
   if (productData.menu) {
-    const newMenu = await prisma.menu.create({ data: { title: productData.menu.title, productId } });
+    const newMenu = await prisma.menu.create({
+      data: { title: productData.menu.title, productId },
+    });
     if (productData.menu.menuSections?.length) {
       for (const section of productData.menu.menuSections) {
         const newSection = await prisma.menuSection.create({
@@ -383,12 +448,17 @@ async function updateAllRelations(productId: string, productData: ProductWithRel
 // ============================================================
 
 // --- 5.1 Spécifications ---
-export async function addProductSpec(productId: string, data: { label: string; value: string; unit?: string }) {
+export async function addProductSpec(
+  productId: string,
+  data: { label: string; value: string; unit?: string },
+) {
   try {
     await ensureProductExists(productId);
-    const spec = await prisma.productSpec.create({ data: { ...data, productId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const spec = await prisma.productSpec.create({
+      data: { ...data, productId },
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, spec };
   } catch (error) {
     console.error("Erreur lors de l'ajout de la spécification :", error);
@@ -399,34 +469,45 @@ export async function addProductSpec(productId: string, data: { label: string; v
 export async function removeProductSpec(specId: string) {
   try {
     await prisma.productSpec.delete({ where: { id: specId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
-    console.error('Erreur lors de la suppression de la spécification :', error);
-    throw new Error('Impossible de supprimer la spécification');
+    console.error("Erreur lors de la suppression de la spécification :", error);
+    throw new Error("Impossible de supprimer la spécification");
   }
 }
 
-export async function updateProductSpec(specId: string, data: Partial<{ label: string; value: string; unit: string }>) {
+export async function updateProductSpec(
+  specId: string,
+  data: Partial<{ label: string; value: string; unit: string }>,
+) {
   try {
-    const spec = await prisma.productSpec.update({ where: { id: specId }, data });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const spec = await prisma.productSpec.update({
+      where: { id: specId },
+      data,
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, spec };
   } catch (error) {
-    console.error('Erreur lors de la mise à jour de la spécification :', error);
-    throw new Error('Impossible de mettre à jour la spécification');
+    console.error("Erreur lors de la mise à jour de la spécification :", error);
+    throw new Error("Impossible de mettre à jour la spécification");
   }
 }
 
 // --- 5.2 Catégories ---
-export async function addCategoryAssignment(productId: string, categoryProductId: string) {
+export async function addCategoryAssignment(
+  productId: string,
+  categoryProductId: string,
+) {
   try {
     await ensureProductExists(productId);
-    const assignment = await prisma.categoryAssignmentProduct.create({ data: { productId, categoryProductId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const assignment = await prisma.categoryAssignmentProduct.create({
+      data: { productId, categoryProductId },
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, assignment };
   } catch (error) {
     console.error("Erreur lors de l'ajout de la catégorie :", error);
@@ -434,15 +515,20 @@ export async function addCategoryAssignment(productId: string, categoryProductId
   }
 }
 
-export async function removeCategoryAssignment(productId: string, categoryProductId: string) {
+export async function removeCategoryAssignment(
+  productId: string,
+  categoryProductId: string,
+) {
   try {
-    await prisma.categoryAssignmentProduct.deleteMany({ where: { productId, categoryProductId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    await prisma.categoryAssignmentProduct.deleteMany({
+      where: { productId, categoryProductId },
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
-    console.error('Erreur lors de la suppression de la catégorie :', error);
-    throw new Error('Impossible de supprimer la catégorie');
+    console.error("Erreur lors de la suppression de la catégorie :", error);
+    throw new Error("Impossible de supprimer la catégorie");
   }
 }
 
@@ -450,9 +536,11 @@ export async function removeCategoryAssignment(productId: string, categoryProduc
 export async function addAllergen(productId: string, value: string) {
   try {
     await ensureProductExists(productId);
-    const allergen = await prisma.productAllergen.create({ data: { value, productId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const allergen = await prisma.productAllergen.create({
+      data: { value, productId },
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, allergen };
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'allergène :", error);
@@ -463,8 +551,8 @@ export async function addAllergen(productId: string, value: string) {
 export async function removeAllergen(allergenId: string) {
   try {
     await prisma.productAllergen.delete({ where: { id: allergenId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
     console.error("Erreur lors de la suppression de l'allergène :", error);
@@ -473,12 +561,17 @@ export async function removeAllergen(allergenId: string) {
 }
 
 // --- 5.4 Scores ---
-export async function addScore(productId: string, data: { type: string; score: number }) {
+export async function addScore(
+  productId: string,
+  data: { type: string; score: number },
+) {
   try {
     await ensureProductExists(productId);
-    const score = await prisma.productScore.create({ data: { ...data, productId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const score = await prisma.productScore.create({
+      data: { ...data, productId },
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, score };
   } catch (error) {
     console.error("Erreur lors de l'ajout du score :", error);
@@ -489,31 +582,44 @@ export async function addScore(productId: string, data: { type: string; score: n
 export async function removeScore(scoreId: string) {
   try {
     await prisma.productScore.delete({ where: { id: scoreId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
-    console.error('Erreur lors de la suppression du score :', error);
-    throw new Error('Impossible de supprimer le score');
+    console.error("Erreur lors de la suppression du score :", error);
+    throw new Error("Impossible de supprimer le score");
   }
 }
 
-export async function updateScore(scoreId: string, data: Partial<{ type: string; score: number }>) {
+export async function updateScore(
+  scoreId: string,
+  data: Partial<{ type: string; score: number }>,
+) {
   try {
-    const score = await prisma.productScore.update({ where: { id: scoreId }, data });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const score = await prisma.productScore.update({
+      where: { id: scoreId },
+      data,
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, score };
   } catch (error) {
-    console.error('Erreur lors de la mise à jour du score :', error);
-    throw new Error('Impossible de mettre à jour le score');
+    console.error("Erreur lors de la mise à jour du score :", error);
+    throw new Error("Impossible de mettre à jour le score");
   }
 }
 
 // --- 5.5 Nutrition ---
 export async function upsertNutritionalInfo(
   productId: string,
-  data: { calories: number; proteins: number; carbohydrates: number; fat: number; fiber?: number; salt?: number }
+  data: {
+    calories: number;
+    proteins: number;
+    carbohydrates: number;
+    fat: number;
+    fiber?: number;
+    salt?: number;
+  },
 ) {
   try {
     await ensureProductExists(productId);
@@ -522,45 +628,56 @@ export async function upsertNutritionalInfo(
       update: data,
       create: { ...data, productId },
     });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, info };
   } catch (error) {
-    console.error('Erreur lors de la mise à jour des infos nutritionnelles :', error);
-    throw new Error('Impossible de mettre à jour les infos nutritionnelles');
+    console.error(
+      "Erreur lors de la mise à jour des infos nutritionnelles :",
+      error,
+    );
+    throw new Error("Impossible de mettre à jour les infos nutritionnelles");
   }
 }
 
 export async function removeNutritionalInfo(productId: string) {
   try {
     await prisma.nutritionalInfo.deleteMany({ where: { productId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
-    console.error('Erreur lors de la suppression des infos nutritionnelles :', error);
-    throw new Error('Impossible de supprimer les infos nutritionnelles');
+    console.error(
+      "Erreur lors de la suppression des infos nutritionnelles :",
+      error,
+    );
+    throw new Error("Impossible de supprimer les infos nutritionnelles");
   }
 }
 
 // --- 5.6 Options ---
 export async function addOptionGroup(
   productId: string,
-  data: { name: string; type?: string; minSelection?: number; maxSelection?: number }
+  data: {
+    name: string;
+    type?: string;
+    minSelection?: number;
+    maxSelection?: number;
+  },
 ) {
   try {
     await ensureProductExists(productId);
     const group = await prisma.optionGroup.create({
       data: {
         ...data,
-        type: data.type || 'OPTIONAL',
+        type: data.type || "OPTIONAL",
         minSelection: data.minSelection || 0,
         maxSelection: data.maxSelection || 1,
         productId,
       },
     });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, group };
   } catch (error) {
     console.error("Erreur lors de l'ajout du groupe d'options :", error);
@@ -570,12 +687,20 @@ export async function addOptionGroup(
 
 export async function updateOptionGroup(
   groupId: string,
-  data: Partial<{ name: string; type: string; minSelection: number; maxSelection: number }>
+  data: Partial<{
+    name: string;
+    type: string;
+    minSelection: number;
+    maxSelection: number;
+  }>,
 ) {
   try {
-    const group = await prisma.optionGroup.update({ where: { id: groupId }, data });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const group = await prisma.optionGroup.update({
+      where: { id: groupId },
+      data,
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, group };
   } catch (error) {
     console.error("Erreur lors de la mise à jour du groupe d'options :", error);
@@ -586,8 +711,8 @@ export async function updateOptionGroup(
 export async function removeOptionGroup(groupId: string) {
   try {
     await prisma.optionGroup.delete({ where: { id: groupId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
     console.error("Erreur lors de la suppression du groupe d'options :", error);
@@ -597,7 +722,12 @@ export async function removeOptionGroup(groupId: string) {
 
 export async function addOptionToGroup(
   groupId: string,
-  data: { name: string; extraPrice?: number; isDefault?: boolean; allergens?: string[] }
+  data: {
+    name: string;
+    extraPrice?: number;
+    isDefault?: boolean;
+    allergens?: string[];
+  },
 ) {
   try {
     const option = await prisma.option.create({
@@ -613,8 +743,8 @@ export async function addOptionToGroup(
         data: data.allergens.map((value) => ({ value, optionId: option.id })),
       });
     }
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, option };
   } catch (error) {
     console.error("Erreur lors de l'ajout de l'option :", error);
@@ -625,8 +755,8 @@ export async function addOptionToGroup(
 export async function removeOptionFromGroup(optionId: string) {
   try {
     await prisma.option.delete({ where: { id: optionId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
     console.error("Erreur lors de la suppression de l'option :", error);
@@ -634,11 +764,17 @@ export async function removeOptionFromGroup(optionId: string) {
   }
 }
 
-export async function updateOption(optionId: string, data: Partial<{ name: string; extraPrice: number; isDefault: boolean }>) {
+export async function updateOption(
+  optionId: string,
+  data: Partial<{ name: string; extraPrice: number; isDefault: boolean }>,
+) {
   try {
-    const option = await prisma.option.update({ where: { id: optionId }, data });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const option = await prisma.option.update({
+      where: { id: optionId },
+      data,
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, option };
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'option :", error);
@@ -649,7 +785,13 @@ export async function updateOption(optionId: string, data: Partial<{ name: strin
 // --- 5.7 Galerie (polymorphique : targetType = PRODUCT, targetId = productId) ---
 export async function upsertProductGallery(
   productId: string,
-  data: { name: string; altText: string; description?: string; mainImage: string; images?: { url: string }[] }
+  data: {
+    name: string;
+    altText: string;
+    description?: string;
+    mainImage: string;
+    images?: { url: string }[];
+  },
 ) {
   try {
     await ensureProductExists(productId);
@@ -658,7 +800,12 @@ export async function upsertProductGallery(
     const gallery = existing
       ? await prisma.gallery.update({
           where: { id: existing.id },
-          data: { name: data.name, altText: data.altText, description: data.description, mainImage: data.mainImage },
+          data: {
+            name: data.name,
+            altText: data.altText,
+            description: data.description,
+            mainImage: data.mainImage,
+          },
         })
       : await prisma.gallery.create({
           data: {
@@ -672,45 +819,62 @@ export async function upsertProductGallery(
         });
 
     if (data.images) {
-      await prisma.galleryImage.deleteMany({ where: { galleryId: gallery.id } });
+      await prisma.galleryImage.deleteMany({
+        where: { galleryId: gallery.id },
+      });
       if (data.images.length) {
         await prisma.galleryImage.createMany({
-          data: data.images.map((img) => ({ url: img.url, galleryId: gallery.id })),
+          data: data.images.map((img) => ({
+            url: img.url,
+            galleryId: gallery.id,
+          })),
         });
       }
     }
 
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, gallery };
   } catch (error) {
-    console.error('Erreur lors de la mise à jour de la galerie :', error);
-    throw new Error('Impossible de mettre à jour la galerie');
+    console.error("Erreur lors de la mise à jour de la galerie :", error);
+    throw new Error("Impossible de mettre à jour la galerie");
   }
 }
 
 export async function removeProductGallery(productId: string) {
   try {
-    await prisma.gallery.deleteMany({ where: { targetType: GalleryTargetType.PRODUCT, targetId: productId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    await prisma.gallery.deleteMany({
+      where: { targetType: GalleryTargetType.PRODUCT, targetId: productId },
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
-    console.error('Erreur lors de la suppression de la galerie :', error);
-    throw new Error('Impossible de supprimer la galerie');
+    console.error("Erreur lors de la suppression de la galerie :", error);
+    throw new Error("Impossible de supprimer la galerie");
   }
 }
 
 // --- 5.8 Relations produit (BetterSell) ---
-export async function addProductRelation(productId: string, relatedProductId: string, type: string, orderdisplay?: number) {
+export async function addProductRelation(
+  productId: string,
+  relatedProductId: string,
+  type: string,
+  orderdisplay?: number,
+) {
   try {
     await ensureProductExists(productId);
     await ensureProductExists(relatedProductId);
     const relation = await prisma.productRelation.create({
-      data: { productId, relatedProductId, type, orderdisplay: orderdisplay || 0 },
+      data: {
+        productId,
+        relatedProductId,
+        type,
+        orderdisplay: orderdisplay || 0,
+      },
     });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, relation };
   } catch (error) {
     console.error("Erreur lors de l'ajout de la relation produit :", error);
@@ -721,24 +885,36 @@ export async function addProductRelation(productId: string, relatedProductId: st
 export async function removeProductRelation(relationId: string) {
   try {
     await prisma.productRelation.delete({ where: { id: relationId } });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true };
   } catch (error) {
-    console.error('Erreur lors de la suppression de la relation produit :', error);
-    throw new Error('Impossible de supprimer la relation produit');
+    console.error(
+      "Erreur lors de la suppression de la relation produit :",
+      error,
+    );
+    throw new Error("Impossible de supprimer la relation produit");
   }
 }
 
-export async function updateProductRelation(relationId: string, data: Partial<{ type: string; orderdisplay: number }>) {
+export async function updateProductRelation(
+  relationId: string,
+  data: Partial<{ type: string; orderdisplay: number }>,
+) {
   try {
-    const relation = await prisma.productRelation.update({ where: { id: relationId }, data });
-    revalidatePath('/b2b/productionTool');
-    revalidateTag('products', {});
+    const relation = await prisma.productRelation.update({
+      where: { id: relationId },
+      data,
+    });
+    revalidatePath("/b2b/productionTool");
+    revalidateTag("products", {});
     return { success: true, relation };
   } catch (error) {
-    console.error('Erreur lors de la mise à jour de la relation produit :', error);
-    throw new Error('Impossible de mettre à jour la relation produit');
+    console.error(
+      "Erreur lors de la mise à jour de la relation produit :",
+      error,
+    );
+    throw new Error("Impossible de mettre à jour la relation produit");
   }
 }
 
@@ -750,12 +926,12 @@ export async function getCategories() {
   try {
     return await prisma.categoryProduct.findMany({
       where: { parentId: null },
-      orderBy: [{ orderdisplay: 'asc' }, { name: 'asc' }],
+      orderBy: [{ orderdisplay: "asc" }, { name: "asc" }],
       include: { children: { include: { children: true } } },
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération des catégories :', error);
-    throw new Error('Impossible de charger les catégories');
+    console.error("Erreur lors de la récupération des catégories :", error);
+    throw new Error("Impossible de charger les catégories");
   }
 }
 
@@ -774,15 +950,15 @@ export async function createCategory(data: {
         categoryType: data.categoryType,
         parentId: data.parentId || null,
         orderdisplay: data.orderdisplay || 0,
-        description: data.description || '',
+        description: data.description || "",
         image: data.image || null,
       },
     });
-    revalidatePath('/b2b/productionTool');
+    revalidatePath("/b2b/productionTool");
     return category;
   } catch (error) {
-    console.error('Erreur lors de la création de la catégorie :', error);
-    throw new Error('Impossible de créer la catégorie');
+    console.error("Erreur lors de la création de la catégorie :", error);
+    throw new Error("Impossible de créer la catégorie");
   }
 }
 
@@ -795,34 +971,51 @@ export async function updateCategory(
     orderdisplay?: number;
     description?: string;
     image?: string;
-  }
+  },
 ) {
   try {
-    const category = await prisma.categoryProduct.update({ where: { id }, data });
-    revalidatePath('/b2b/productionTool');
+    const category = await prisma.categoryProduct.update({
+      where: { id },
+      data,
+    });
+    revalidatePath("/b2b/productionTool");
     return category;
   } catch (error) {
-    console.error(`Erreur lors de la mise à jour de la catégorie ${id} :`, error);
-    throw new Error('Impossible de mettre à jour la catégorie');
+    console.error(
+      `Erreur lors de la mise à jour de la catégorie ${id} :`,
+      error,
+    );
+    throw new Error("Impossible de mettre à jour la catégorie");
   }
 }
 
 export async function deleteCategory(id: string) {
   try {
-    const hasChildren = await prisma.categoryProduct.count({ where: { parentId: id } });
+    const hasChildren = await prisma.categoryProduct.count({
+      where: { parentId: id },
+    });
     if (hasChildren > 0) {
-      throw new Error('Impossible de supprimer une catégorie qui a des sous-catégories');
+      throw new Error(
+        "Impossible de supprimer une catégorie qui a des sous-catégories",
+      );
     }
-    const hasAssignments = await prisma.categoryAssignmentProduct.count({ where: { categoryProductId: id } });
+    const hasAssignments = await prisma.categoryAssignmentProduct.count({
+      where: { categoryProductId: id },
+    });
     if (hasAssignments > 0) {
-      throw new Error('Impossible de supprimer une catégorie assignée à des produits');
+      throw new Error(
+        "Impossible de supprimer une catégorie assignée à des produits",
+      );
     }
     await prisma.categoryProduct.delete({ where: { id } });
-    revalidatePath('/b2b/productionTool');
+    revalidatePath("/b2b/productionTool");
     return { success: true };
   } catch (error) {
-    console.error(`Erreur lors de la suppression de la catégorie ${id} :`, error);
-    throw new Error('Impossible de supprimer la catégorie');
+    console.error(
+      `Erreur lors de la suppression de la catégorie ${id} :`,
+      error,
+    );
+    throw new Error("Impossible de supprimer la catégorie");
   }
 }
 
@@ -834,42 +1027,50 @@ export async function getProductsByBrand(brandId: string) {
   try {
     return await prisma.product.findMany({
       where: { brandId, deletedAt: null },
-      orderBy: [{ orderdisplay: 'asc' }, { name: 'asc' }],
+      orderBy: [{ orderdisplay: "asc" }, { name: "asc" }],
     });
   } catch (error) {
-    console.error(`Erreur lors de la récupération des produits de la marque ${brandId} :`, error);
-    throw new Error('Erreur lors du chargement des produits');
+    console.error(
+      `Erreur lors de la récupération des produits de la marque ${brandId} :`,
+      error,
+    );
+    throw new Error("Erreur lors du chargement des produits");
   }
 }
 
-export async function createProduct(data: Prisma.ProductCreateWithoutBrandInput & { brandId: string }) {
+export async function createProduct(
+  data: Prisma.ProductCreateWithoutBrandInput & { brandId: string },
+) {
   try {
     const { brandId, ...rest } = data;
     const slug = rest.slug || generateSlug(rest.name);
     const product = await prisma.product.create({
       data: { ...rest, slug, brand: { connect: { id: brandId } } },
     });
-    revalidatePath('/admin/productManager');
+    revalidatePath("/admin/productManager");
     return product;
   } catch (error) {
-    console.error('Erreur lors de la création du produit :', error);
-    throw new Error('Erreur lors de la création du produit');
+    console.error("Erreur lors de la création du produit :", error);
+    throw new Error("Erreur lors de la création du produit");
   }
 }
 
-export async function updateProduct(id: string, data: Prisma.ProductUpdateInput) {
+export async function updateProduct(
+  id: string,
+  data: Prisma.ProductUpdateInput,
+) {
   try {
-    const nameValue = typeof data.name === 'string' ? data.name : undefined;
+    const nameValue = typeof data.name === "string" ? data.name : undefined;
     const slug = nameValue ? generateSlug(nameValue) : undefined;
     const product = await prisma.product.update({
       where: { id },
       data: { ...data, ...(slug && { slug }) },
     });
-    revalidatePath('/admin/productManager');
+    revalidatePath("/admin/productManager");
     return product;
   } catch (error) {
     console.error(`Erreur lors de la mise à jour du produit ${id} :`, error);
-    throw new Error('Erreur lors de la mise à jour du produit');
+    throw new Error("Erreur lors de la mise à jour du produit");
   }
 }
 
@@ -880,10 +1081,10 @@ export async function deleteProduct(id: string) {
       data: { deletedAt: new Date() },
       select: { name: true },
     });
-    revalidatePath('/admin/productManager');
+    revalidatePath("/admin/productManager");
     return product;
   } catch (error) {
     console.error(`Erreur lors de la suppression du produit ${id} :`, error);
-    throw new Error('Erreur lors de la suppression du produit');
+    throw new Error("Erreur lors de la suppression du produit");
   }
 }

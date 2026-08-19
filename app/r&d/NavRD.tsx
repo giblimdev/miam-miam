@@ -5,11 +5,11 @@
    useBy : app/r&d/layout.tsx ou app/r&d/page.tsx
 */
 
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * Représente un élément du menu de navigation R&D.
@@ -26,15 +26,15 @@ interface NavItem {
  * Adapte les URLs selon le besoin.
  */
 const navItems: NavItem[] = [
-  { label: 'Accueil', url: '/r&d' },
-  { label: 'Prompt', url: '/r&d/prompt' },
-  { label: 'Design UX', url: '/r&d/design' },
-  { label: 'Stack', url: '/r&d/stack' },
-  { label: 'Scrum', url: '/r&d/scrum' },
-  { label: 'Schema', url: '/r&d/schema' },
-  { label: 'Commandes', url: '/r&d/cmd' },
-  { label: 'Senari', url: '/r&d/senari' },
-
+  { label: "Accueil", url: "/r&d" },
+  { label: "Prompt", url: "/r&d/prompt" },
+  { label: "Design UX", url: "/r&d/design" },
+  { label: "Stack", url: "/r&d/stack" },
+  { label: "Scrum", url: "/r&d/scrum" },
+  { label: "Schema", url: "/r&d/schema" },
+  { label: "Commandes", url: "/r&d/cmd" },
+  { label: "Senari", url: "/r&d/senari" },
+  { label: "Architecture", url: "/r&d/archi" },
 ];
 
 /**
@@ -54,8 +54,8 @@ export default function RdNav() {
           {navItems.map((item) => {
             // Détection de la correspondance exacte ou préfixe pour la section "Accueil"
             const isActive =
-              item.url === '/r&d'
-                ? pathname === '/r&d'
+              item.url === "/r&d"
+                ? pathname === "/r&d"
                 : pathname.startsWith(item.url);
 
             return (
@@ -67,11 +67,11 @@ export default function RdNav() {
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2
                     ${
                       isActive
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200/50'
-                        : 'text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 active:scale-95'
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-200/50"
+                        : "text-slate-600 hover:text-indigo-700 hover:bg-indigo-50 active:scale-95"
                     }
                   `}
-                  aria-current={isActive ? 'page' : undefined}
+                  aria-current={isActive ? "page" : undefined}
                 >
                   {item.label}
                 </Link>

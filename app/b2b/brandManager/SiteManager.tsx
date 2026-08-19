@@ -1,15 +1,19 @@
 // app/b2b/brandManager/SiteManager.tsx
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, RefreshCw, ArrowLeft } from 'lucide-react';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { getSitesByBrand, deleteSite, restoreSite } from '@/actions/siteManager';
-import { SiteForm } from './SiteForm';
-import { useBrandStore } from '@/stores/useBrandStore';
-import type { Site } from '@/lib/generated/prisma/client';
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Plus, Pencil, Trash2, RefreshCw, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import {
+  getSitesByBrand,
+  deleteSite,
+  restoreSite,
+} from "@/actions/siteManager";
+import { SiteForm } from "./SiteForm";
+import { useBrandStore } from "@/stores/useBrandStore";
+import type { Site } from "@/lib/generated/prisma/client";
 
 type SiteWithAddress = Site & {
   Address?: any;
@@ -36,7 +40,7 @@ export default function SiteManager() {
       const data = await getSitesByBrand(selectedBrandId);
       setSites(data as SiteWithAddress[]);
     } catch (error) {
-      toast.error('Erreur lors du chargement des sites');
+      toast.error("Erreur lors du chargement des sites");
     } finally {
       setLoading(false);
     }
@@ -63,7 +67,7 @@ export default function SiteManager() {
         toast.success(`Site "${name}" supprimé`);
         await loadSites();
       } catch (error) {
-        toast.error('Erreur lors de la suppression');
+        toast.error("Erreur lors de la suppression");
       }
     }
   };
@@ -75,7 +79,7 @@ export default function SiteManager() {
         toast.success(`Site "${name}" restauré`);
         await loadSites();
       } catch (error) {
-        toast.error('Erreur lors de la restauration');
+        toast.error("Erreur lors de la restauration");
       }
     }
   };
@@ -92,7 +96,7 @@ export default function SiteManager() {
   };
 
   const handleBack = () => {
-    router.push('/b2b/brandManager');
+    router.push("/b2b/brandManager");
   };
 
   // Affichage si aucune marque sélectionnée
@@ -113,14 +117,16 @@ export default function SiteManager() {
       <div className="flex items-center justify-center p-8">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Chargement des sites...</p>
+          <p className="text-sm text-muted-foreground">
+            Chargement des sites...
+          </p>
         </div>
       </div>
     );
   }
 
-  const activeSites = sites.filter(s => !s.deletedAt);
-  const deletedSites = sites.filter(s => s.deletedAt);
+  const activeSites = sites.filter((s) => !s.deletedAt);
+  const deletedSites = sites.filter((s) => s.deletedAt);
 
   return (
     <div className="space-y-6">
@@ -136,7 +142,7 @@ export default function SiteManager() {
             Retour
           </Button>
           <h2 className="text-2xl font-bold">
-            Sites de {selectedBrandName || 'la marque'}
+            Sites de {selectedBrandName || "la marque"}
           </h2>
         </div>
         <Button
@@ -153,13 +159,17 @@ export default function SiteManager() {
         <div className="rounded-lg border border-orange-200 bg-orange-50/50 p-4 shadow-sm dark:bg-orange-950/10">
           <SiteForm
             brandId={selectedBrandId}
-            initialData={editingSite ? {
-              id: editingSite.id,
-              name: editingSite.name,
-              phone: editingSite.phone || '',
-              email: editingSite.email || '',
-              isOpen: editingSite.isOpen,
-            } : undefined}
+            initialData={
+              editingSite
+                ? {
+                    id: editingSite.id,
+                    name: editingSite.name,
+                    phone: editingSite.phone || "",
+                    email: editingSite.email || "",
+                    isOpen: editingSite.isOpen,
+                  }
+                : undefined
+            }
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />
@@ -170,7 +180,9 @@ export default function SiteManager() {
       <div className="rounded-lg border divide-y">
         {activeSites.length === 0 ? (
           <div className="flex flex-col items-center p-8 text-center">
-            <p className="text-muted-foreground">Aucun site actif pour cette marque</p>
+            <p className="text-muted-foreground">
+              Aucun site actif pour cette marque
+            </p>
             <Button
               variant="link"
               onClick={handleCreate}
@@ -191,11 +203,11 @@ export default function SiteManager() {
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
                       site.isOpen
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                        : 'bg-muted-foreground/20 text-muted-foreground'
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                        : "bg-muted-foreground/20 text-muted-foreground"
                     }`}
                   >
-                    {site.isOpen ? '🟢 Ouvert' : '🔴 Fermé'}
+                    {site.isOpen ? "🟢 Ouvert" : "🔴 Fermé"}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
@@ -221,10 +233,10 @@ export default function SiteManager() {
                   <Pencil className="h-4 w-4" />
                 </Button>
                 <Button
-                  variant="destructive"
+                  variant="outline"
                   size="sm"
                   onClick={() => handleDelete(site.id, site.name)}
-                  className="bg-red-500 hover:bg-red-600"
+                  className="bg-red-100 hover:bg-red-300"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -242,8 +254,13 @@ export default function SiteManager() {
           </h3>
           <div className="space-y-2">
             {deletedSites.map((site) => (
-              <div key={site.id} className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground line-through">{site.name}</span>
+              <div
+                key={site.id}
+                className="flex items-center justify-between text-sm"
+              >
+                <span className="text-muted-foreground line-through">
+                  {site.name}
+                </span>
                 <Button
                   variant="outline"
                   size="sm"

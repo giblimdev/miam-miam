@@ -1,11 +1,12 @@
 // app/b2b/brandManager/page.tsx
-'use client';
+"use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import BrandManager from './BrandManager';
-import SiteManager from './SiteManager';
-import ProductManager from './ProductManager';
-import { useBrandStore } from '@/stores/useBrandStore';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BrandManager from "./BrandManager";
+import SiteManager from "./SiteManager";
+import ProductManager from "./ProductManager";
+import { useBrandStore } from "@/stores/useBrandStore";
+import { ShowsStores } from "@/components/ShowStore";
 
 export default function BrandManagerPage() {
   const selectedBrandId = useBrandStore((state) => state.selectedBrandId);
@@ -13,7 +14,7 @@ export default function BrandManagerPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <h1 className="text-3xl font-bold">Gestion B2B</h1>
-
+      <ShowsStores />
       <Tabs defaultValue="brands" className="space-y-4">
         <TabsList>
           <TabsTrigger value="brands">Marques</TabsTrigger>
